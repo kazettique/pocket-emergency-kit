@@ -11,7 +11,7 @@ import type { UserSettings } from '../types'
 import { strings, type Lang, type StringKey } from './strings'
 
 export type TranslateFn = (key: StringKey, vars?: Record<string, string | number>) => string
-export type LocalizeFn = <T extends Record<string, unknown>>(item: T | null | undefined, field: string) => string
+export type LocalizeFn = <T extends object>(item: T | null | undefined, field: string) => string
 
 interface I18nContextValue {
   lang: Lang

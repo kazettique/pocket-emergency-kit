@@ -1,0 +1,163 @@
+.kit-screen {
+  padding: var(--sp-4);
+}
+
+.kit-title {
+  font-size: var(--fs-xl);
+  font-weight: 500;
+  margin-bottom: var(--sp-3);
+}
+
+.kit-progress {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-4);
+}
+
+.kit-progress-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--c-bg-secondary);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.kit-progress-fill {
+  height: 100%;
+  background: var(--c-ok);
+  border-radius: 3px;
+  transition: width 0.2s ease-out;
+}
+
+.kit-progress-label {
+  font-size: var(--fs-xs);
+  color: var(--c-text-secondary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.kit-empty {
+  padding: var(--sp-5) var(--sp-4);
+  text-align: center;
+  color: var(--c-text-tertiary);
+  font-size: var(--fs-sm);
+  background: var(--c-bg-secondary);
+  border-radius: var(--r-md);
+}
+
+.kit-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.kit-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: var(--tap);
+  padding: var(--sp-2) 0;
+  border-bottom: 0.5px solid var(--c-border-subtle);
+}
+
+.kit-row:last-child {
+  border-bottom: none;
+}
+
+.kit-row-label-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.kit-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--r-sm);
+  border: 1.5px solid var(--c-border);
+  background: var(--c-bg);
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.kit-checkbox:checked {
+  background: var(--c-ok);
+  border-color: var(--c-ok);
+}
+
+.kit-checkbox:checked::after {
+  content: '';
+  width: 11px;
+  height: 6px;
+  border-left: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  transform: rotate(-45deg) translate(1px, -1px);
+}
+
+.kit-checkbox:focus-visible {
+  outline: 2px solid var(--c-accent);
+  outline-offset: 2px;
+}
+
+.kit-row-label {
+  font-size: var(--fs-md);
+  color: var(--c-text);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  flex: 1;
+}
+
+.kit-row[data-done='true'] .kit-row-label {
+  color: var(--c-text-tertiary);
+  text-decoration: line-through;
+}
+
+.kit-cat {
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 999px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.kit-cat.is-water_food {
+  background: var(--c-ok-bg);
+  color: var(--c-ok-text);
+}
+
+.kit-cat.is-medical {
+  background: var(--c-danger-bg);
+  color: var(--c-danger-text);
+}
+
+.kit-cat.is-tools {
+  background: var(--c-warn-bg);
+  color: var(--c-warn-text);
+}
+
+.kit-cat.is-documents {
+  background: var(--c-info-bg);
+  color: var(--c-info-text);
+}
+
+.kit-cat.is-plan {
+  background: #eeedfe;
+  color: #3c3489;
+}
+
+.kit-cat.is-communication {
+  background: #f0ece4;
+  color: #5b4d32;
+}

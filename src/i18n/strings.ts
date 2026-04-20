@@ -136,6 +136,18 @@ export const strings = {
   'disaster.typhoon': { ja: '台風', en: 'Typhoon' },
   'disaster.heatwave': { ja: '猛暑', en: 'Heatwave' },
 
+  'kit.progress': { ja: '{pct}% 完了', en: '{pct}% complete' },
+  'kit.empty': {
+    ja: '備蓄データが同期されていません。しばらくしてから再度ご確認ください。',
+    en: 'Checklist items have not been synced yet. Check back once sync completes.',
+  },
+  'category.water_food': { ja: '水・食料', en: 'Water & food' },
+  'category.medical': { ja: '医療', en: 'Medical' },
+  'category.tools': { ja: '道具', en: 'Tools' },
+  'category.documents': { ja: '書類', en: 'Documents' },
+  'category.plan': { ja: '計画', en: 'Plan' },
+  'category.communication': { ja: '通信', en: 'Communication' },
+
   'screen.comingSoon': { ja: '準備中です', en: 'Coming soon' },
   'screen.map.body': {
     ja: 'MapLibre GL による災害リスクマップ。',

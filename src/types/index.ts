@@ -144,10 +144,19 @@ export interface RiverLevel {
   fetchedAt: number
 }
 
+export interface GeoJSONFeatureCollection {
+  type: 'FeatureCollection'
+  features: Array<{
+    type: 'Feature'
+    geometry: unknown
+    properties: Record<string, unknown> | null
+  }>
+}
+
 export interface HazardZoneData {
-  flood: GeoJSON.FeatureCollection
-  landslide: GeoJSON.FeatureCollection
-  tsunami: GeoJSON.FeatureCollection
+  flood: GeoJSONFeatureCollection
+  landslide: GeoJSONFeatureCollection
+  tsunami: GeoJSONFeatureCollection
   fetchedAt: number
 }
 
@@ -158,6 +167,7 @@ export interface UserSettings {
   homeAddress?: string
   chosenEvacSiteId?: string
   language: 'ja' | 'en'
+  theme?: 'light' | 'dark' | 'system'
   setupComplete: boolean
 }
 

@@ -4,6 +4,7 @@ import type {
   ChecklistItem,
   EmergencyContact,
   AreaAnnotation,
+  DisasterType,
 } from '../types'
 import {
   saveEvacuationSites,
@@ -58,7 +59,7 @@ function extractEvacuationSite(raw: Record<string, unknown>): EvacuationSite {
     location:       raw.location as EvacuationSite['location'],
     address:        raw.address as string,
     capacity:       Number(raw.capacity ?? 0),
-    disaster_types: (raw.disaster_types as string[] | undefined) ?? [],
+    disaster_types: ((raw.disaster_types as DisasterType[] | undefined) ?? []),
     accessible:     Boolean(raw.accessible),
     accepts_pets:   Boolean(raw.accepts_pets),
     notes:          raw.notes as string | undefined,
@@ -123,7 +124,7 @@ function extractAreaAnnotation(raw: Record<string, unknown>): AreaAnnotation {
     location:            raw.location as AreaAnnotation['location'],
     zone:                raw.zone as AreaAnnotation['zone'] | undefined,
     annotation_type:     raw.annotation_type as AreaAnnotation['annotation_type'],
-    disaster_relevance:  (raw.disaster_relevance as string[] | undefined) ?? [],
+    disaster_relevance:  ((raw.disaster_relevance as DisasterType[] | undefined) ?? []),
     severity:            raw.severity as AreaAnnotation['severity'],
     source:              raw.source as string | undefined,
     valid_until:         raw.valid_until as string | undefined,

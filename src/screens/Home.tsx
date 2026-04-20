@@ -1,5 +1,12 @@
 import { useEffect, useState } from 'react'
-import type { JmaAlert, RiverLevel, UserSettings, ChecklistItem, ChecklistState } from '../types'
+import type {
+  JmaAlert,
+  RiverLevel,
+  UserSettings,
+  ChecklistItem,
+  ChecklistState,
+  JshisRisk,
+} from '../types'
 import {
   getGovCache,
   getLastSyncedAt,
@@ -19,6 +26,12 @@ import './Home.css'
 
 const NEARBY_RADIUS_M = 2000
 
+function seismicColor(prob30yr: number): string {
+  if (prob30yr >= 0.6) return 'var(--c-danger)'
+  if (prob30yr >= 0.3) return 'var(--c-warn-border)'
+  return 'var(--c-ok)'
+}
+
 interface HomeData {
   jma: JmaAlert | null
   rivers: RiverLevel[]
@@ -26,6 +39,7 @@ interface HomeData {
   evacSiteCount: number
   checklistItems: ChecklistItem[]
   checklistState: ChecklistState
+  seismicRisk: JshisRisk | null
   lastSyncAt: Date | null
   jmaIsStale: boolean
 }
@@ -37,6 +51,7 @@ const EMPTY: HomeData = {
   evacSiteCount: 0,
   checklistItems: [],
   checklistState: {},
+  seismicRisk: null,
   lastSyncAt: null,
   jmaIsStale: true,
 }
@@ -66,17 +81,27 @@ export default function Home({
   useEffect(() => {
     let cancelled = false
     ;(async () => {
-      const [jma, rivers, settings, sites, checklistItems, checklistState, lastSyncAt, jmaIsStale] =
-        await Promise.all([
-          getGovCache<JmaAlert>('jma:alerts'),
-          getGovCache<RiverLevel[]>('mlit:river_levels'),
-          getUserSettings(),
-          getAllEvacuationSites(),
-          getAllChecklistItems(),
-          getChecklistState(),
-          getLastSyncedAt('gov:jma'),
-          isStale('gov:jma'),
-        ])
+      const [
+        jma,
+        rivers,
+        settings,
+        sites,
+        checklistItems,
+        checklistState,
+        seismicRisk,
+        lastSyncAt,
+        jmaIsStale,
+      ] = await Promise.all([
+        getGovCache<JmaAlert>('jma:alerts'),
+        getGovCache<RiverLevel[]>('mlit:river_levels'),
+        getUserSettings(),
+        getAllEvacuationSites(),
+        getAllChecklistItems(),
+        getChecklistState(),
+        getGovCache<JshisRisk>('jshis:risk'),
+        getLastSyncedAt('gov:jma'),
+        isStale('gov:jma'),
+      ])
       if (cancelled) return
       const home = settings?.homeLocation ?? null
       const evacSiteCount = home
@@ -94,6 +119,7 @@ export default function Home({
         evacSiteCount,
         checklistItems,
         checklistState,
+        seismicRisk: seismicRisk ?? null,
         lastSyncAt,
         jmaIsStale,
       })
@@ -103,7 +129,17 @@ export default function Home({
     }
   }, [sync.status, sync.lastSyncAt])
 
-  const { jma, rivers, settings, evacSiteCount, checklistItems, checklistState, lastSyncAt, jmaIsStale } = data
+  const {
+    jma,
+    rivers,
+    settings,
+    evacSiteCount,
+    checklistItems,
+    checklistState,
+    seismicRisk,
+    lastSyncAt,
+    jmaIsStale,
+  } = data
   const warningsCount = jma?.warnings.length ?? 0
   const kitPct = kitPercent(checklistItems, checklistState)
   const areaName = jma?.areaName ?? (lang === 'en' ? 'Tokyo' : '東京都')
@@ -205,7 +241,15 @@ export default function Home({
           label={t('stat.evacSites')}
         />
         <StatCard value={`${kitPct}%`} label={t('stat.kitComplete')} />
-        <StatCard value="—" valueColor="var(--c-info-text)" label={t('stat.lastQuake')} />
+        {seismicRisk ? (
+          <StatCard
+            value={`${Math.round(seismicRisk.prob30yr * 100)}%`}
+            valueColor={seismicColor(seismicRisk.prob30yr)}
+            label={t('stat.seismic30yr')}
+          />
+        ) : (
+          <StatCard value="—" valueColor="var(--c-info-text)" label={t('stat.seismic30yr')} />
+        )}
       </div>
     </section>
   )

@@ -7,6 +7,7 @@ import type {
   DisasterType,
   HazardZoneData,
   GeoJSONFeatureCollection,
+  JshisRisk,
 } from '../types'
 import { getAllEvacuationSites, getGovCache, getUserSettings } from '../db/idb'
 import { useT } from '../i18n'
@@ -37,6 +38,12 @@ const HAZARD_LABEL_KEY: Record<HazardKey, StringKey> = {
 
 function hasFeatures(fc: GeoJSONFeatureCollection | undefined): boolean {
   return !!fc && Array.isArray(fc.features) && fc.features.length > 0
+}
+
+function riskColor(prob30yr: number): string {
+  if (prob30yr >= 0.6) return 'var(--c-danger)'
+  if (prob30yr >= 0.3) return 'var(--c-warn-border)'
+  return 'var(--c-ok)'
 }
 
 const DISASTER_TYPE_KEY: Record<DisasterType, StringKey> = {
@@ -77,6 +84,7 @@ export default function Map() {
   const [sites, setSites] = useState<EvacuationSite[]>([])
   const [home, setHome] = useState<UserSettings['homeLocation']>(null)
   const [hazards, setHazards] = useState<HazardZoneData | null>(null)
+  const [seismicRisk, setSeismicRisk] = useState<JshisRisk | null>(null)
   const [layerVis, setLayerVis] = useState<Record<HazardKey, boolean>>({
     flood: true,
     landslide: true,
@@ -87,15 +95,17 @@ export default function Map() {
   useEffect(() => {
     let cancelled = false
     ;(async () => {
-      const [allSites, settings, cachedHazards] = await Promise.all([
+      const [allSites, settings, cachedHazards, cachedRisk] = await Promise.all([
         getAllEvacuationSites(),
         getUserSettings(),
         getGovCache<HazardZoneData>('mlit:hazard_zones'),
+        getGovCache<JshisRisk>('jshis:risk'),
       ])
       if (cancelled) return
       setSites(allSites)
       setHome(settings?.homeLocation ?? null)
       setHazards(cachedHazards ?? null)
+      setSeismicRisk(cachedRisk ?? null)
       setLoaded(true)
     })()
     return () => {
@@ -239,6 +249,14 @@ export default function Map() {
     <section className="screen map-screen">
       <header className="map-header">
         <h1 className="map-header-title">{t('tab.map')}</h1>
+        {seismicRisk ? (
+          <span
+            className="map-header-risk"
+            style={{ color: riskColor(seismicRisk.prob30yr) }}
+          >
+            {t('stat.seismic30yr')}: {Math.round(seismicRisk.prob30yr * 100)}%
+          </span>
+        ) : null}
       </header>
       <div ref={containerRef} className="map-container" />
       {anyHazardPresent ? (

@@ -53,6 +53,7 @@ export const strings = {
   'stat.evacSites': { ja: '付近の避難場所', en: 'evac sites nearby' },
   'stat.kitComplete': { ja: '備蓄の進捗', en: 'kit complete' },
   'stat.lastQuake': { ja: '直近の地震', en: 'last quake' },
+  'stat.seismic30yr': { ja: '地震リスク (30年)', en: 'seismic risk (30y)' },
 
   'setup.cta.title': { ja: '自宅の位置を設定してください', en: 'Set your home location' },
   'setup.cta.body': {

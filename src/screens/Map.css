@@ -8,6 +8,7 @@
 .map-header {
   display: flex;
   align-items: baseline;
+  justify-content: space-between;
   gap: var(--sp-3);
   padding: var(--sp-3) var(--sp-4);
   border-bottom: 0.5px solid var(--c-border);
@@ -22,6 +23,12 @@
 .map-header-sub {
   font-size: var(--fs-xs);
   color: var(--c-text-tertiary);
+}
+
+.map-header-risk {
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
 }
 
 .map-container {

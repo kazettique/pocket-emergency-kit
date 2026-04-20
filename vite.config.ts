@@ -3,6 +3,11 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  build: {
+    // Keep all feature code in the initial bundle so the service worker can
+    // precache it on first visit for full offline capability.
+    chunkSizeWarningLimit: 2000,
+  },
   plugins: [
     react(),
     VitePWA({
@@ -10,9 +15,10 @@ export default defineConfig({
       devOptions: { enabled: true },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/cyberjapan\.jp\/xyz\//,
+            urlPattern: /^https:\/\/cyberjapandata\.gsi\.go\.jp\/xyz\//,
             handler: 'CacheFirst',
             options: {
               cacheName: 'gsi-tiles',

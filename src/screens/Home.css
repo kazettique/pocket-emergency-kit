@@ -48,3 +48,50 @@
   font-size: var(--fs-sm);
   font-weight: 500;
 }
+
+.home-cta.is-compact {
+  background: var(--c-bg-secondary);
+  border: 0.5px solid var(--c-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+
+.home-cta-compact-inner {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.home-cta-compact-label {
+  font-size: var(--fs-xs);
+  color: var(--c-text-tertiary);
+}
+
+.home-cta-compact-value {
+  font-size: var(--fs-sm);
+  color: var(--c-text);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.home-cta-compact-button {
+  min-height: 28px;
+  padding: 2px 10px;
+  border-radius: var(--r-sm);
+  font-size: var(--fs-xs);
+  color: var(--c-accent);
+  border: 0.5px solid var(--c-accent);
+  background: var(--c-bg);
+  flex-shrink: 0;
+}
+
+.home-cta-compact-button:hover {
+  background: var(--c-accent-weak);
+}

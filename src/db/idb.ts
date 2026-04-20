@@ -179,7 +179,8 @@ export async function saveUserSettings(settings: UserSettings) {
 }
 
 export async function getChecklistState(): Promise<ChecklistState> {
-  return (await getDB()).get('checklist_state', 'state') ?? {}
+  const db = await getDB()
+  return (await db.get('checklist_state', 'state')) ?? {}
 }
 
 export async function saveChecklistState(state: ChecklistState) {
@@ -191,7 +192,8 @@ export async function saveChecklistState(state: ChecklistState) {
 const STALE_THRESHOLD_MS = 6 * 60 * 60 * 1000 // 6 hours
 
 export async function getSyncTimestamps(): Promise<SyncTimestamps> {
-  return (await getDB()).get('sync_timestamps', 'timestamps') ?? {}
+  const db = await getDB()
+  return (await db.get('sync_timestamps', 'timestamps')) ?? {}
 }
 
 export async function markSynced(key: string) {

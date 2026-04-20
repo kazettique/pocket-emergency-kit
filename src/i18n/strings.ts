@@ -60,6 +60,52 @@ export const strings = {
     en: 'Setting your location enables nearby evac sites and seismic risk.',
   },
   'setup.cta.button': { ja: '位置を設定', en: 'Set location' },
+  'setup.cta.change.title': { ja: '自宅の位置', en: 'Home location' },
+  'setup.cta.change.button': { ja: '変更', en: 'Change' },
+
+  'setup.header.title': { ja: '自宅の位置を設定', en: 'Set home location' },
+  'setup.header.back': { ja: '戻る', en: 'Back' },
+  'setup.intro': {
+    ja: '自宅の位置を設定すると、付近の避難場所・地震リスク・浸水想定を表示できます。位置情報はこの端末内にのみ保存されます。',
+    en: "Setting your home location enables nearby evac sites, seismic risk, and flood projections. Location is stored only on this device.",
+  },
+  'setup.geo.title': { ja: '現在地を使用', en: 'Use current location' },
+  'setup.geo.body': { ja: 'ブラウザの位置情報を使います。', en: "Uses your browser's location." },
+  'setup.geo.button': { ja: '現在地を取得', en: 'Detect location' },
+  'setup.geo.requesting': { ja: '位置情報を取得中…', en: 'Requesting location…' },
+  'setup.geo.denied': {
+    ja: '位置情報の利用が拒否されました。ブラウザの設定から許可してください。',
+    en: 'Location permission denied. Enable it in your browser settings.',
+  },
+  'setup.geo.unavailable': {
+    ja: '位置情報を取得できませんでした。区から選択してください。',
+    en: 'Could not get your location. Please pick a ward instead.',
+  },
+  'setup.geo.timeout': {
+    ja: 'タイムアウトしました。もう一度お試しください。',
+    en: 'Request timed out. Please try again.',
+  },
+  'setup.wards.title': { ja: '23区から選ぶ', en: 'Pick a Tokyo ward' },
+  'setup.wards.body': {
+    ja: '大まかな位置で十分です。あとで変更できます。',
+    en: 'Approximate is fine. You can change this later.',
+  },
+  'setup.wards.other': { ja: 'その他（23区外）', en: 'Other (outside 23 wards)' },
+  'setup.preview.title': { ja: '設定する位置', en: 'Selected location' },
+  'setup.preview.source.geo': { ja: '現在地から取得', en: 'from current location' },
+  'setup.preview.source.ward': { ja: '{ward}を選択', en: 'Selected {ward}' },
+  'setup.preview.source.other': { ja: '端末の位置情報', en: 'Device location' },
+  'setup.save': { ja: '保存', en: 'Save' },
+  'setup.saving': { ja: '保存中…', en: 'Saving…' },
+  'setup.saveError': {
+    ja: '保存に失敗しました。もう一度お試しください。',
+    en: 'Save failed. Please try again.',
+  },
+  'setup.footer.note': {
+    ja: '位置情報はホーム画面からいつでも変更できます。',
+    en: 'You can change this anytime from the home screen.',
+  },
+  'setup.address.tokyoGeo': { ja: '東京都 (現在地)', en: 'Tokyo (current location)' },
 
   'screen.comingSoon': { ja: '準備中です', en: 'Coming soon' },
   'screen.map.body': {

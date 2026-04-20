@@ -10,6 +10,7 @@ import Map from './screens/Map'
 import Kit from './screens/Kit'
 import Guide from './screens/Guide'
 import Sos from './screens/Sos'
+import Setup from './screens/Setup'
 import './App.css'
 
 const TAB_KEYS: readonly TabKey[] = ['home', 'map', 'kit', 'guide', 'sos']
@@ -22,6 +23,7 @@ function parseHash(): TabKey | null {
 function Shell() {
   const sync = useSyncEngine()
   const [tab, setTab] = useState<TabKey>(() => parseHash() ?? 'home')
+  const [setupOpen, setSetupOpen] = useState(false)
 
   useEffect(() => {
     const onHash = () => setTab(parseHash() ?? 'home')
@@ -39,13 +41,14 @@ function Shell() {
       {!sync.isOnline ? <OfflineBanner /> : null}
       <TopStatusBar isOnline={sync.isOnline} lastSyncAt={sync.lastSyncAt} status={sync.status} />
       <main className="app-main">
-        {tab === 'home' && <Home sync={sync} />}
+        {tab === 'home' && <Home sync={sync} onOpenSetup={() => setSetupOpen(true)} />}
         {tab === 'map' && <Map />}
         {tab === 'kit' && <Kit />}
         {tab === 'guide' && <Guide />}
         {tab === 'sos' && <Sos />}
       </main>
       <TabBar active={tab} onChange={go} />
+      {setupOpen ? <Setup sync={sync} onClose={() => setSetupOpen(false)} /> : null}
     </div>
   )
 }

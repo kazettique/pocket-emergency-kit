@@ -50,7 +50,13 @@ function kitPercent(items: ChecklistItem[], state: ChecklistState): number {
   return Math.round((done / items.length) * 100)
 }
 
-export default function Home({ sync }: { sync: SyncState }) {
+export default function Home({
+  sync,
+  onOpenSetup,
+}: {
+  sync: SyncState
+  onOpenSetup: () => void
+}) {
   const { t, lang } = useT()
   const [data, setData] = useState<HomeData>(EMPTY)
 
@@ -103,11 +109,23 @@ export default function Home({ sync }: { sync: SyncState }) {
         <div className="home-cta">
           <div className="home-cta-title">{t('setup.cta.title')}</div>
           <p className="home-cta-body">{t('setup.cta.body')}</p>
-          <button type="button" className="home-cta-button" disabled>
+          <button type="button" className="home-cta-button" onClick={onOpenSetup}>
             {t('setup.cta.button')}
           </button>
         </div>
-      ) : null}
+      ) : (
+        <div className="home-cta is-compact">
+          <div className="home-cta-compact-inner">
+            <span className="home-cta-compact-label">{t('setup.cta.change.title')}</span>
+            <span className="home-cta-compact-value">
+              {settings.homeAddress ?? `${settings.homeLocation.lat.toFixed(3)}, ${settings.homeLocation.lng.toFixed(3)}`}
+            </span>
+          </div>
+          <button type="button" className="home-cta-compact-button" onClick={onOpenSetup}>
+            {t('setup.cta.change.button')}
+          </button>
+        </div>
+      )}
 
       <h2 className="home-title">{t('home.title')}</h2>
 

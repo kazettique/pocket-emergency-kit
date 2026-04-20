@@ -31,6 +31,55 @@
   background: var(--c-bg-tertiary);
 }
 
+.map-layers {
+  display: flex;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-4);
+  border-top: 0.5px solid var(--c-border);
+  background: var(--c-bg);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.map-layers::-webkit-scrollbar {
+  display: none;
+}
+
+.map-layer-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 0.5px solid var(--c-border);
+  background: var(--c-bg);
+  font-size: var(--fs-xs);
+  color: var(--c-text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
+  opacity: 0.55;
+}
+
+.map-layer-chip.is-on {
+  opacity: 1;
+  background: var(--c-bg-secondary);
+  border-color: var(--c-border);
+  color: var(--c-text);
+}
+
+.map-layer-chip:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.map-layer-chip-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
 .map-list {
   flex: 0 0 auto;
   max-height: 40vh;

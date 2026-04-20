@@ -117,6 +117,14 @@ export const strings = {
   'map.siteAccessible': { ja: 'バリアフリー', en: 'Accessible' },
   'map.siteAcceptsPets': { ja: 'ペット可', en: 'Pets OK' },
   'map.siteDisasterTypes': { ja: '対応災害', en: 'Covers' },
+  'map.layers.title': { ja: 'ハザード表示', en: 'Hazard layers' },
+  'map.layers.flood': { ja: '洪水', en: 'Flood' },
+  'map.layers.landslide': { ja: '土砂災害', en: 'Landslide' },
+  'map.layers.tsunami': { ja: '津波', en: 'Tsunami' },
+  'map.layers.noData': {
+    ja: 'データ未取得',
+    en: 'Not synced',
+  },
 
   'disaster.earthquake': { ja: '地震', en: 'Earthquake' },
   'disaster.flood': { ja: '洪水', en: 'Flood' },

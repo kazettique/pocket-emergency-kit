@@ -1,8 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import type { EvacuationSite, UserSettings, DisasterType } from '../types'
-import { getAllEvacuationSites, getUserSettings } from '../db/idb'
+import type {
+  EvacuationSite,
+  UserSettings,
+  DisasterType,
+  HazardZoneData,
+  GeoJSONFeatureCollection,
+} from '../types'
+import { getAllEvacuationSites, getGovCache, getUserSettings } from '../db/idb'
 import { useT } from '../i18n'
 import type { StringKey } from '../i18n'
 import { haversineDistance, formatDistance } from '../utils/geo'
@@ -13,6 +19,25 @@ const DEFAULT_ZOOM = 11
 const HOME_ZOOM = 14
 const GSI_TILES = 'https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png'
 const NEAREST_COUNT = 5
+
+type HazardKey = 'flood' | 'landslide' | 'tsunami'
+const HAZARD_KEYS: readonly HazardKey[] = ['flood', 'landslide', 'tsunami']
+
+const HAZARD_COLOR: Record<HazardKey, string> = {
+  flood: '#4da6ff',
+  landslide: '#b8651d',
+  tsunami: '#0c447c',
+}
+
+const HAZARD_LABEL_KEY: Record<HazardKey, StringKey> = {
+  flood: 'map.layers.flood',
+  landslide: 'map.layers.landslide',
+  tsunami: 'map.layers.tsunami',
+}
+
+function hasFeatures(fc: GeoJSONFeatureCollection | undefined): boolean {
+  return !!fc && Array.isArray(fc.features) && fc.features.length > 0
+}
 
 const DISASTER_TYPE_KEY: Record<DisasterType, StringKey> = {
   earthquake: 'disaster.earthquake',
@@ -51,24 +76,47 @@ export default function Map() {
   const { t, lang } = useT()
   const [sites, setSites] = useState<EvacuationSite[]>([])
   const [home, setHome] = useState<UserSettings['homeLocation']>(null)
+  const [hazards, setHazards] = useState<HazardZoneData | null>(null)
+  const [layerVis, setLayerVis] = useState<Record<HazardKey, boolean>>({
+    flood: true,
+    landslide: true,
+    tsunami: true,
+  })
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
     let cancelled = false
     ;(async () => {
-      const [allSites, settings] = await Promise.all([
+      const [allSites, settings, cachedHazards] = await Promise.all([
         getAllEvacuationSites(),
         getUserSettings(),
+        getGovCache<HazardZoneData>('mlit:hazard_zones'),
       ])
       if (cancelled) return
       setSites(allSites)
       setHome(settings?.homeLocation ?? null)
+      setHazards(cachedHazards ?? null)
       setLoaded(true)
     })()
     return () => {
       cancelled = true
     }
   }, [])
+
+  function toggleLayer(key: HazardKey) {
+    const next = !layerVis[key]
+    setLayerVis((prev) => ({ ...prev, [key]: next }))
+    const map = mapRef.current
+    if (!map) return
+    const fillId = `hazard-${key}-fill`
+    const lineId = `hazard-${key}-line`
+    if (map.getLayer(fillId)) {
+      map.setLayoutProperty(fillId, 'visibility', next ? 'visible' : 'none')
+    }
+    if (map.getLayer(lineId)) {
+      map.setLayoutProperty(lineId, 'visibility', next ? 'visible' : 'none')
+    }
+  }
 
   useEffect(() => {
     if (!containerRef.current || !loaded) return
@@ -120,6 +168,46 @@ export default function Map() {
       siteMarkersRef.current.push(marker)
     }
 
+    function addHazardLayers() {
+      if (!hazards) return
+      for (const key of HAZARD_KEYS) {
+        const data = hazards[key]
+        if (!hasFeatures(data)) continue
+        const sourceId = `hazard-${key}`
+        const fillId = `hazard-${key}-fill`
+        const lineId = `hazard-${key}-line`
+        map.addSource(sourceId, {
+          type: 'geojson',
+          data: data as GeoJSON.FeatureCollection,
+        })
+        const visibility = layerVis[key] ? 'visible' : 'none'
+        map.addLayer({
+          id: fillId,
+          type: 'fill',
+          source: sourceId,
+          paint: {
+            'fill-color': HAZARD_COLOR[key],
+            'fill-opacity': 0.3,
+          },
+          layout: { visibility },
+        })
+        map.addLayer({
+          id: lineId,
+          type: 'line',
+          source: sourceId,
+          paint: {
+            'line-color': HAZARD_COLOR[key],
+            'line-width': 1,
+            'line-opacity': 0.6,
+          },
+          layout: { visibility },
+        })
+      }
+    }
+
+    if (map.isStyleLoaded()) addHazardLayers()
+    else map.once('load', addHazardLayers)
+
     return () => {
       homeMarkerRef.current?.remove()
       homeMarkerRef.current = null
@@ -128,7 +216,9 @@ export default function Map() {
       map.remove()
       mapRef.current = null
     }
-  }, [loaded, sites, home, lang, t])
+    // layerVis is intentionally read as initial value on each map init; toggles happen imperatively
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loaded, sites, home, hazards, lang, t])
 
   const nearest: SiteWithDistance[] = home
     ? sites
@@ -143,12 +233,39 @@ export default function Map() {
         .slice(0, NEAREST_COUNT)
     : sites.slice(0, NEAREST_COUNT).map((s) => ({ site: s, distanceM: null }))
 
+  const anyHazardPresent = HAZARD_KEYS.some((k) => hasFeatures(hazards?.[k]))
+
   return (
     <section className="screen map-screen">
       <header className="map-header">
         <h1 className="map-header-title">{t('tab.map')}</h1>
       </header>
       <div ref={containerRef} className="map-container" />
+      {anyHazardPresent ? (
+        <div className="map-layers" role="group" aria-label={t('map.layers.title')}>
+          {HAZARD_KEYS.map((key) => {
+            const available = hasFeatures(hazards?.[key])
+            const on = layerVis[key]
+            return (
+              <button
+                key={key}
+                type="button"
+                className={`map-layer-chip${on && available ? ' is-on' : ''}`}
+                onClick={() => available && toggleLayer(key)}
+                disabled={!available}
+                aria-pressed={on && available}
+              >
+                <span
+                  className="map-layer-chip-swatch"
+                  style={{ background: HAZARD_COLOR[key] }}
+                  aria-hidden="true"
+                />
+                <span>{t(HAZARD_LABEL_KEY[key])}</span>
+              </button>
+            )
+          })}
+        </div>
+      ) : null}
       <div className="map-list">
         <div className="map-list-title">
           {home ? t('map.nearestTitle') : t('map.allSitesTitle')}

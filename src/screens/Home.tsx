@@ -14,7 +14,10 @@ import type { SyncState } from '../hooks/useSyncEngine'
 import { SyncBar } from '../components/SyncBar'
 import { AlertCard, type AlertVariant } from '../components/AlertCard'
 import { StatCard } from '../components/StatCard'
+import { haversineDistance } from '../utils/geo'
 import './Home.css'
+
+const NEARBY_RADIUS_M = 2000
 
 interface HomeData {
   jma: JmaAlert | null
@@ -75,11 +78,20 @@ export default function Home({
           isStale('gov:jma'),
         ])
       if (cancelled) return
+      const home = settings?.homeLocation ?? null
+      const evacSiteCount = home
+        ? sites.filter((s) =>
+            haversineDistance(home, {
+              lat: s.location.coordinates[1],
+              lng: s.location.coordinates[0],
+            }) <= NEARBY_RADIUS_M,
+          ).length
+        : sites.length
       setData({
         jma: jma ?? null,
         rivers: rivers ?? [],
         settings: settings ?? null,
-        evacSiteCount: sites.length,
+        evacSiteCount,
         checklistItems,
         checklistState,
         lastSyncAt,

@@ -107,6 +107,26 @@ export const strings = {
   },
   'setup.address.tokyoGeo': { ja: '東京都 (現在地)', en: 'Tokyo (current location)' },
 
+  'map.nearestTitle': { ja: '近くの避難場所', en: 'Nearest evacuation sites' },
+  'map.allSitesTitle': { ja: '避難場所', en: 'Evacuation sites' },
+  'map.sitesEmpty': {
+    ja: '避難場所データがまだ同期されていません。',
+    en: 'Evacuation sites have not been synced yet.',
+  },
+  'map.siteCapacity': { ja: '収容 {n}人', en: 'Capacity {n}' },
+  'map.siteAccessible': { ja: 'バリアフリー', en: 'Accessible' },
+  'map.siteAcceptsPets': { ja: 'ペット可', en: 'Pets OK' },
+  'map.siteDisasterTypes': { ja: '対応災害', en: 'Covers' },
+
+  'disaster.earthquake': { ja: '地震', en: 'Earthquake' },
+  'disaster.flood': { ja: '洪水', en: 'Flood' },
+  'disaster.tsunami': { ja: '津波', en: 'Tsunami' },
+  'disaster.fire': { ja: '火災', en: 'Fire' },
+  'disaster.landslide': { ja: '土砂災害', en: 'Landslide' },
+  'disaster.storm_surge': { ja: '高潮', en: 'Storm surge' },
+  'disaster.typhoon': { ja: '台風', en: 'Typhoon' },
+  'disaster.heatwave': { ja: '猛暑', en: 'Heatwave' },
+
   'screen.comingSoon': { ja: '準備中です', en: 'Coming soon' },
   'screen.map.body': {
     ja: 'MapLibre GL による災害リスクマップ。',

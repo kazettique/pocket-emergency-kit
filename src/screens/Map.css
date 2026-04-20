@@ -25,10 +25,118 @@
 }
 
 .map-container {
-  flex: 1;
-  min-height: 0;
+  flex: 1 1 auto;
+  min-height: 240px;
   width: 100%;
   background: var(--c-bg-tertiary);
+}
+
+.map-list {
+  flex: 0 0 auto;
+  max-height: 40vh;
+  overflow-y: auto;
+  padding: var(--sp-3) var(--sp-4);
+  border-top: 0.5px solid var(--c-border);
+  background: var(--c-bg);
+}
+
+.map-list-title {
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--c-text-tertiary);
+  margin-bottom: var(--sp-2);
+}
+
+.map-list-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.map-list-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) 0;
+  border-bottom: 0.5px solid var(--c-border-subtle);
+}
+
+.map-list-item:last-child {
+  border-bottom: none;
+}
+
+.map-list-item-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.map-list-item-name {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--c-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.map-list-item-meta {
+  font-size: var(--fs-xs);
+  color: var(--c-text-secondary);
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.map-list-item-distance {
+  font-size: var(--fs-sm);
+  color: var(--c-text-secondary);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.map-list-empty {
+  font-size: var(--fs-sm);
+  color: var(--c-text-tertiary);
+  padding: var(--sp-3) 0;
+  text-align: center;
+}
+
+.map-site-pin {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--c-ok);
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+
+.maplibregl-popup-content {
+  font-family: var(--font-sans) !important;
+  padding: 8px 12px !important;
+  border-radius: var(--r-md) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.map-popup-name {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--c-text);
+  margin-bottom: 2px;
+}
+
+.map-popup-types {
+  font-size: var(--fs-xs);
+  color: var(--c-text-secondary);
+  margin-bottom: 2px;
+}
+
+.map-popup-meta {
+  font-size: var(--fs-xs);
+  color: var(--c-text-tertiary);
 }
 
 .map-home-pin {

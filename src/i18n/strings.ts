@@ -148,6 +148,13 @@ export const strings = {
   'category.plan': { ja: '計画', en: 'Plan' },
   'category.communication': { ja: '通信', en: 'Communication' },
 
+  'sos.title': { ja: '緊急連絡先', en: 'Emergency contacts' },
+  'sos.sectionEmergency': { ja: '緊急通報', en: 'Emergency services' },
+  'sos.sectionCity': { ja: '地域の連絡先', en: 'City contacts' },
+  'sos.sectionInfo': { ja: '災害情報', en: 'Disaster information' },
+  'sos.tapToCall': { ja: 'タップで発信', en: 'Tap to call' },
+  'sos.tapToVisit': { ja: 'タップで開く', en: 'Open link' },
+
   'screen.comingSoon': { ja: '準備中です', en: 'Coming soon' },
   'screen.map.body': {
     ja: 'MapLibre GL による災害リスクマップ。',

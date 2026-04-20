@@ -1,0 +1,108 @@
+.sos-screen {
+  padding: var(--sp-4);
+}
+
+.sos-title {
+  font-size: var(--fs-xl);
+  font-weight: 500;
+  margin-bottom: var(--sp-4);
+}
+
+.sos-section {
+  margin-bottom: var(--sp-5);
+}
+
+.sos-section-head {
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--c-text-tertiary);
+  margin-bottom: var(--sp-2);
+}
+
+.sos-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: var(--tap);
+  padding: var(--sp-2) 0;
+  border-bottom: 0.5px solid var(--c-border-subtle);
+  text-decoration: none;
+  color: inherit;
+}
+
+.sos-row:last-child {
+  border-bottom: none;
+}
+
+.sos-row:focus-visible {
+  outline: 2px solid var(--c-accent);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+.sos-row:active {
+  background: var(--c-bg-secondary);
+}
+
+.sos-badge {
+  min-width: 48px;
+  height: 40px;
+  padding: 0 10px;
+  border-radius: var(--r-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  font-size: var(--fs-md);
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.sos-badge.is-danger {
+  background: var(--c-danger-bg);
+  color: var(--c-danger-text);
+}
+
+.sos-badge.is-warn {
+  background: var(--c-warn-bg);
+  color: var(--c-warn-text);
+}
+
+.sos-badge.is-info {
+  background: var(--c-info-bg);
+  color: var(--c-info-text);
+}
+
+.sos-badge.is-ok {
+  background: var(--c-ok-bg);
+  color: var(--c-ok-text);
+  font-size: var(--fs-sm);
+}
+
+.sos-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.sos-body-label {
+  font-size: var(--fs-md);
+  font-weight: 500;
+  color: var(--c-text);
+}
+
+.sos-body-meta {
+  font-size: var(--fs-xs);
+  color: var(--c-text-secondary);
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sos-chevron {
+  font-size: var(--fs-sm);
+  color: var(--c-text-tertiary);
+  flex-shrink: 0;
+}

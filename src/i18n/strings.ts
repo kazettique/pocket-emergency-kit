@@ -155,6 +155,24 @@ export const strings = {
   'sos.tapToCall': { ja: 'タップで発信', en: 'Tap to call' },
   'sos.tapToVisit': { ja: 'タップで開く', en: 'Open link' },
 
+  'guide.offlineNote': {
+    ja: 'すべての情報はオフラインで利用可能',
+    en: 'All guides available offline',
+  },
+  'guide.empty': {
+    ja: 'この条件の記事はまだありません。',
+    en: 'No articles matching this filter yet.',
+  },
+  'guide.back': { ja: '一覧へ戻る', en: 'Back to list' },
+  'guide.critical': { ja: '重要', en: 'Critical' },
+  'guide.offlineReady': {
+    ja: 'この内容はオフラインでも閲覧できます。',
+    en: 'This guide is available offline.',
+  },
+  'phase.before': { ja: '事前', en: 'Before' },
+  'phase.during': { ja: '発生時', en: 'During' },
+  'phase.after': { ja: '事後', en: 'After' },
+
   'screen.comingSoon': { ja: '準備中です', en: 'Coming soon' },
   'screen.map.body': {
     ja: 'MapLibre GL による災害リスクマップ。',

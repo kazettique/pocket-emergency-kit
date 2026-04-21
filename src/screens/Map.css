@@ -217,6 +217,29 @@
   color: var(--c-text-tertiary);
 }
 
+.map-popup-route {
+  margin-top: 4px;
+  font-size: var(--fs-xs);
+  color: var(--c-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.map-popup-action {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 4px 8px;
+  border-radius: var(--r-sm);
+  background: var(--c-accent);
+  color: #fff !important;
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  text-decoration: none !important;
+}
+
+.map-popup-action:hover {
+  opacity: 0.9;
+}
+
 .map-home-pin {
   width: 14px;
   height: 14px;

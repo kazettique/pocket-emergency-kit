@@ -137,6 +137,15 @@ export const strings = {
     ja: 'データ未取得',
     en: 'Not synced',
   },
+  'map.directions.open': { ja: 'マップで経路を開く', en: 'Open directions in Maps' },
+  'map.directions.from.current': {
+    ja: '現在地からの直線距離',
+    en: 'Straight-line from current location',
+  },
+  'map.directions.from.home': {
+    ja: '自宅からの直線距離',
+    en: 'Straight-line from home',
+  },
 
   'disaster.earthquake': { ja: '地震', en: 'Earthquake' },
   'disaster.flood': { ja: '洪水', en: 'Flood' },

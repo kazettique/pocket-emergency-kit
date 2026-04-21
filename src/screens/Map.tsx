@@ -30,6 +30,10 @@ const HAZARD_COLOR: Record<HazardKey, string> = {
   tsunami: '#0c447c',
 }
 
+const ROUTE_SOURCE_ID = 'route-line-source'
+const ROUTE_LAYER_ID = 'route-line'
+const ROUTE_COLOR = '#d85a30'
+
 const HAZARD_LABEL_KEY: Record<HazardKey, StringKey> = {
   flood: 'map.layers.flood',
   landslide: 'map.layers.landslide',
@@ -80,6 +84,7 @@ export default function Map() {
   const mapRef = useRef<maplibregl.Map | null>(null)
   const homeMarkerRef = useRef<maplibregl.Marker | null>(null)
   const siteMarkersRef = useRef<globalThis.Map<string, maplibregl.Marker>>(new globalThis.Map())
+  const userPositionRef = useRef<[number, number] | null>(null)
   const { t, lang } = useT()
   const [sites, setSites] = useState<EvacuationSite[]>([])
   const [home, setHome] = useState<UserSettings['homeLocation']>(null)
@@ -122,8 +127,29 @@ export default function Map() {
       if (m !== marker) m.getPopup()?.remove()
     })
     const [lng, lat] = site.location.coordinates
-    map.flyTo({ center: [lng, lat], zoom: 15, speed: 1.2, essential: true })
-    if (!marker.getPopup()?.isOpen()) marker.togglePopup()
+    const origin =
+      userPositionRef.current ?? (home ? ([home.lng, home.lat] as [number, number]) : null)
+    const originKind: 'current' | 'home' | null = userPositionRef.current
+      ? 'current'
+      : home
+        ? 'home'
+        : null
+    const popup = marker.getPopup()
+    popup?.setHTML(renderPopupHTML(site, lang, t, origin, originKind))
+    if (origin) {
+      drawRoute(map, origin, [lng, lat])
+      map.fitBounds(
+        [
+          [Math.min(origin[0], lng), Math.min(origin[1], lat)],
+          [Math.max(origin[0], lng), Math.max(origin[1], lat)],
+        ],
+        { padding: 80, maxZoom: 15, duration: 900 },
+      )
+    } else {
+      clearRoute(map)
+      map.flyTo({ center: [lng, lat], zoom: 15, speed: 1.2, essential: true })
+    }
+    if (!popup?.isOpen()) marker.togglePopup()
     containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
     setSelectedId(site.id)
   }
@@ -167,15 +193,17 @@ export default function Map() {
     })
     mapRef.current = map
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right')
-    map.addControl(
-      new maplibregl.GeolocateControl({
-        positionOptions: { enableHighAccuracy: true, timeout: 10000 },
-        trackUserLocation: false,
-        showUserLocation: true,
-        fitBoundsOptions: { maxZoom: 15 },
-      }),
-      'top-right',
-    )
+    const geolocate = new maplibregl.GeolocateControl({
+      positionOptions: { enableHighAccuracy: true, timeout: 10000 },
+      trackUserLocation: false,
+      showUserLocation: true,
+      fitBoundsOptions: { maxZoom: 15 },
+    })
+    geolocate.on('geolocate', (e) => {
+      const coords = (e as unknown as { coords: GeolocationCoordinates }).coords
+      userPositionRef.current = [coords.longitude, coords.latitude]
+    })
+    map.addControl(geolocate, 'top-right')
 
     if (home) {
       const el = document.createElement('div')
@@ -353,6 +381,8 @@ function renderPopupHTML(
   site: EvacuationSite,
   lang: 'ja' | 'en',
   t: (key: StringKey, vars?: Record<string, string | number>) => string,
+  origin: [number, number] | null = null,
+  originKind: 'current' | 'home' | null = null,
 ): string {
   const name = lang === 'en' && site.name_en ? site.name_en : site.name
   const types = site.disaster_types.map((dt) => t(DISASTER_TYPE_KEY[dt])).join(' · ')
@@ -361,11 +391,73 @@ function renderPopupHTML(
   if (site.accessible) badges.push(t('map.siteAccessible'))
   if (site.accepts_pets) badges.push(t('map.siteAcceptsPets'))
   const metaParts = [cap, ...badges]
+  const [lng, lat] = site.location.coordinates
+  const mapsUrl =
+    `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=walking` +
+    (origin ? `&origin=${origin[1]},${origin[0]}` : '')
+  const originLabel =
+    originKind === 'current'
+      ? t('map.directions.from.current')
+      : originKind === 'home'
+        ? t('map.directions.from.home')
+        : ''
+  const distanceLabel =
+    origin !== null
+      ? formatDistance(
+          haversineDistance(
+            { lat: origin[1], lng: origin[0] },
+            { lat, lng },
+          ) ?? 0,
+          lang,
+        )
+      : ''
   return `
     <div class="map-popup">
       <div class="map-popup-name">${escapeHTML(name)}</div>
       ${types ? `<div class="map-popup-types">${escapeHTML(types)}</div>` : ''}
       <div class="map-popup-meta">${escapeHTML(metaParts.join(' · '))}</div>
+      ${
+        originLabel
+          ? `<div class="map-popup-route">${escapeHTML(originLabel)} · ${escapeHTML(distanceLabel)}</div>`
+          : ''
+      }
+      <a class="map-popup-action" href="${escapeHTML(mapsUrl)}" target="_blank" rel="noopener noreferrer">
+        ${escapeHTML(t('map.directions.open'))}
+      </a>
     </div>
   `
+}
+
+function drawRoute(
+  map: maplibregl.Map,
+  from: [number, number],
+  to: [number, number],
+): void {
+  const data: GeoJSON.Feature<GeoJSON.LineString> = {
+    type: 'Feature',
+    properties: {},
+    geometry: { type: 'LineString', coordinates: [from, to] },
+  }
+  const existing = map.getSource(ROUTE_SOURCE_ID) as maplibregl.GeoJSONSource | undefined
+  if (existing) {
+    existing.setData(data)
+    return
+  }
+  map.addSource(ROUTE_SOURCE_ID, { type: 'geojson', data })
+  map.addLayer({
+    id: ROUTE_LAYER_ID,
+    type: 'line',
+    source: ROUTE_SOURCE_ID,
+    paint: {
+      'line-color': ROUTE_COLOR,
+      'line-width': 3,
+      'line-dasharray': [2, 2],
+      'line-opacity': 0.9,
+    },
+  })
+}
+
+function clearRoute(map: maplibregl.Map): void {
+  if (map.getLayer(ROUTE_LAYER_ID)) map.removeLayer(ROUTE_LAYER_ID)
+  if (map.getSource(ROUTE_SOURCE_ID)) map.removeSource(ROUTE_SOURCE_ID)
 }

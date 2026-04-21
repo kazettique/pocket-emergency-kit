@@ -116,3 +116,50 @@ code {
   font-family: var(--font-mono);
   font-size: 0.92em;
 }
+
+/* ── Dark theme overrides ─────────────────────────────────────────────────
+ * Applied when ThemeProvider sets <html data-theme="dark">. Every token
+ * in :root above gets a dark-friendly counterpart here. Colour tiers keep
+ * their semantic meaning (accent = orange, warn = amber, ok = green,
+ * danger = red) but shift toward muted backgrounds + brighter foregrounds
+ * so content stays legible against a dark base.
+ */
+[data-theme='dark'] {
+  --c-bg: #161619;
+  --c-bg-secondary: #1f1f24;
+  --c-bg-tertiary: #2a2a31;
+  --c-border: #33333b;
+  --c-border-subtle: rgba(255, 255, 255, 0.08);
+  --c-text: #f1f1f4;
+  --c-text-secondary: #a6a6ae;
+  --c-text-tertiary: #737380;
+
+  --c-accent: #ff7a4e;
+  --c-accent-weak: rgba(255, 122, 78, 0.14);
+
+  --c-warn-bg: #3a2a14;
+  --c-warn-border: #c6860d;
+  --c-warn-text: #f0c572;
+  --c-warn-body: #e9b85e;
+  --c-warn-meta: #d0a250;
+
+  --c-ok-bg: #192d24;
+  --c-ok-border: #3a8a66;
+  --c-ok-text: #7cd9b3;
+  --c-ok: #3fb88a;
+
+  --c-danger-bg: #331818;
+  --c-danger-border: #ff7a4e;
+  --c-danger-text: #ff9a82;
+  --c-danger: #ff6a42;
+
+  --c-info-bg: #15223a;
+  --c-info-text: #7fb3e8;
+
+  color-scheme: dark;
+}
+
+/* Body background also tracks the theme so iOS pull-to-refresh gutter looks right. */
+[data-theme='dark'] body {
+  background: var(--c-bg-secondary);
+}

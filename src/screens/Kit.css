@@ -161,3 +161,13 @@
   background: #f0ece4;
   color: #5b4d32;
 }
+
+[data-theme='dark'] .kit-cat.is-plan {
+  background: #2a2545;
+  color: #c7c2f2;
+}
+
+[data-theme='dark'] .kit-cat.is-communication {
+  background: #2d2a22;
+  color: #d6c29a;
+}

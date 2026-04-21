@@ -256,6 +256,13 @@
   color: #0f6e56;
 }
 
+[data-theme='dark'] .alert-card.is-ok .alert-card-body {
+  color: #9dddc0;
+}
+[data-theme='dark'] .alert-card.is-ok .alert-card-meta {
+  color: #8ac8ab;
+}
+
 .alert-card.is-danger .alert-card-title {
   color: var(--c-danger-text);
 }

@@ -79,12 +79,13 @@ export default function Map() {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<maplibregl.Map | null>(null)
   const homeMarkerRef = useRef<maplibregl.Marker | null>(null)
-  const siteMarkersRef = useRef<maplibregl.Marker[]>([])
+  const siteMarkersRef = useRef<globalThis.Map<string, maplibregl.Marker>>(new globalThis.Map())
   const { t, lang } = useT()
   const [sites, setSites] = useState<EvacuationSite[]>([])
   const [home, setHome] = useState<UserSettings['homeLocation']>(null)
   const [hazards, setHazards] = useState<HazardZoneData | null>(null)
   const [seismicRisk, setSeismicRisk] = useState<JshisRisk | null>(null)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
   const [layerVis, setLayerVis] = useState<Record<HazardKey, boolean>>({
     flood: true,
     landslide: true,
@@ -112,6 +113,20 @@ export default function Map() {
       cancelled = true
     }
   }, [])
+
+  function handleSelectSite(site: EvacuationSite) {
+    const map = mapRef.current
+    const marker = siteMarkersRef.current.get(site.id)
+    if (!map || !marker) return
+    siteMarkersRef.current.forEach((m) => {
+      if (m !== marker) m.getPopup()?.remove()
+    })
+    const [lng, lat] = site.location.coordinates
+    map.flyTo({ center: [lng, lat], zoom: 15, speed: 1.2, essential: true })
+    if (!marker.getPopup()?.isOpen()) marker.togglePopup()
+    containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    setSelectedId(site.id)
+  }
 
   function toggleLayer(key: HazardKey) {
     const next = !layerVis[key]
@@ -152,6 +167,15 @@ export default function Map() {
     })
     mapRef.current = map
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right')
+    map.addControl(
+      new maplibregl.GeolocateControl({
+        positionOptions: { enableHighAccuracy: true, timeout: 10000 },
+        trackUserLocation: false,
+        showUserLocation: true,
+        fitBoundsOptions: { maxZoom: 15 },
+      }),
+      'top-right',
+    )
 
     if (home) {
       const el = document.createElement('div')
@@ -175,7 +199,7 @@ export default function Map() {
         .setLngLat([lng, lat])
         .setPopup(popup)
         .addTo(map)
-      siteMarkersRef.current.push(marker)
+      siteMarkersRef.current.set(site.id, marker)
     }
 
     function addHazardLayers() {
@@ -222,7 +246,7 @@ export default function Map() {
       homeMarkerRef.current?.remove()
       homeMarkerRef.current = null
       siteMarkersRef.current.forEach((m) => m.remove())
-      siteMarkersRef.current = []
+      siteMarkersRef.current.clear()
       map.remove()
       mapRef.current = null
     }
@@ -294,21 +318,28 @@ export default function Map() {
           <ul className="map-list-items">
             {nearest.map(({ site, distanceM }) => (
               <li key={site.id} className="map-list-item">
-                <div className="map-list-item-body">
-                  <div className="map-list-item-name">
-                    {lang === 'en' && site.name_en ? site.name_en : site.name}
+                <button
+                  type="button"
+                  className={`map-list-item-btn${site.id === selectedId ? ' is-selected' : ''}`}
+                  onClick={() => handleSelectSite(site)}
+                  aria-pressed={site.id === selectedId}
+                >
+                  <div className="map-list-item-body">
+                    <div className="map-list-item-name">
+                      {lang === 'en' && site.name_en ? site.name_en : site.name}
+                    </div>
+                    <div className="map-list-item-meta">
+                      {site.disaster_types
+                        .map((dt) => t(DISASTER_TYPE_KEY[dt]))
+                        .join(' · ')}
+                    </div>
                   </div>
-                  <div className="map-list-item-meta">
-                    {site.disaster_types
-                      .map((dt) => t(DISASTER_TYPE_KEY[dt]))
-                      .join(' · ')}
-                  </div>
-                </div>
-                {distanceM !== null ? (
-                  <span className="map-list-item-distance">
-                    {formatDistance(distanceM, lang)}
-                  </span>
-                ) : null}
+                  {distanceM !== null ? (
+                    <span className="map-list-item-distance">
+                      {formatDistance(distanceM, lang)}
+                    </span>
+                  ) : null}
+                </button>
               </li>
             ))}
           </ul>

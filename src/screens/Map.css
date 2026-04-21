@@ -115,14 +115,33 @@
 }
 
 .map-list-item {
+  display: block;
+}
+
+.map-list-item-btn {
   display: flex;
   align-items: center;
   gap: var(--sp-3);
+  width: 100%;
   padding: var(--sp-2) 0;
+  background: transparent;
+  border: none;
   border-bottom: 0.5px solid var(--c-border-subtle);
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
 }
 
-.map-list-item:last-child {
+.map-list-item-btn:hover {
+  background: var(--c-bg-secondary);
+}
+
+.map-list-item-btn.is-selected {
+  background: var(--c-accent-weak);
+}
+
+.map-list-item:last-child .map-list-item-btn {
   border-bottom: none;
 }
 

@@ -168,6 +168,54 @@
   border-color: var(--c-danger-border);
 }
 
+.alert-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: var(--r-sm);
+}
+
+.alert-card-header.is-static {
+  cursor: default;
+}
+
+.alert-card-header:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.alert-card-header-inner {
+  flex: 1;
+  min-width: 0;
+}
+
+.alert-card-chevron {
+  flex-shrink: 0;
+  margin-top: 4px;
+  color: currentColor;
+  transition: transform 150ms ease;
+}
+
+.alert-card.is-expanded .alert-card-chevron {
+  transform: rotate(90deg);
+}
+
+.alert-card-extra {
+  margin-top: var(--sp-3);
+  padding-top: var(--sp-3);
+  border-top: 0.5px solid currentColor;
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+
 .alert-card-title {
   font-size: var(--fs-sm);
   font-weight: 500;

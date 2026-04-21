@@ -1,12 +1,28 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+  const cmsProxyTarget = (env.CMS_PROXY_TARGET || 'https://api.cms.test.reearth.dev').replace(/\/$/, '')
+
+  return {
   build: {
     // Keep all feature code in the initial bundle so the service worker can
     // precache it on first visit for full offline capability.
     chunkSizeWarningLimit: 2000,
+  },
+  server: {
+    // Proxy same-origin /api/p/* to the Re:Earth CMS public-read API host so
+    // the browser sees a same-origin request and doesn't enforce CORS. Client
+    // code uses `VITE_CMS_BASE_URL=""` (relative URLs) to make this work.
+    proxy: {
+      '/api/p': {
+        target: cmsProxyTarget,
+        changeOrigin: true,
+        secure: true,
+      },
+    },
   },
   plugins: [
     react(),
@@ -52,4 +68,5 @@ export default defineConfig({
       },
     }),
   ],
+  }
 })

@@ -38,10 +38,11 @@ async function fetchAllPages<T>(model: string): Promise<T[]> {
     const res = await fetch(url)
     if (!res.ok) throw new Error(`CMS fetch failed: ${model} page ${page} → ${res.status}`)
     const data = await res.json()
-    // Re:Earth CMS public API response shape: { items: [...], totalCount: N }
-    const items: T[] = data.items ?? []
+    // Re:Earth CMS public API response envelope:
+    // { results: [...], totalCount: N, hasMore, page, offset, limit }
+    const items: T[] = data.results ?? data.items ?? []
     results.push(...items)
-    if (results.length >= (data.totalCount ?? 0) || items.length < limit) break
+    if (data.hasMore === false || results.length >= (data.totalCount ?? 0) || items.length < limit) break
     page++
   }
 

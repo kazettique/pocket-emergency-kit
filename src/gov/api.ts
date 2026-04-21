@@ -117,11 +117,14 @@ async function fetchMlitGeoJSON(endpoint: string, z: number, x: number, y: numbe
   return res.json()
 }
 
+// Flip to true when VITE_MLIT_API_KEY is filled. Parked by default because
+// MLIT key approval takes ~1 week — calling without a key just warns on every
+// sync and clutters the console.
+const MLIT_ENABLED: boolean = false
+
 export async function fetchHazardZones(lat: number, lng: number): Promise<HazardZoneData | null> {
-  if (!MLIT_API_KEY) {
-    console.warn('VITE_MLIT_API_KEY not set — skipping hazard zone fetch')
-    return null
-  }
+  if (!MLIT_ENABLED) return null
+  if (!MLIT_API_KEY) return null
   if (!(await isStale('gov:hazard_zones'))) return null
 
   try {

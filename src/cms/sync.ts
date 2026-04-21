@@ -18,7 +18,13 @@ import {
 
 // ─── Config (replace with your Re:Earth CMS details) ──────────────────────────
 
-const CMS_BASE = import.meta.env.VITE_CMS_BASE_URL   // e.g. https://cms.example.com
+// In dev, always emit relative URLs so Vite's /api/p proxy forwards to
+// CMS_PROXY_TARGET — browser treats it as same-origin, no CORS. In prod,
+// honour VITE_CMS_BASE_URL (trailing slashes stripped so we never produce
+// //api/p/... by accident).
+const CMS_BASE = import.meta.env.DEV
+  ? ''
+  : (import.meta.env.VITE_CMS_BASE_URL ?? '').replace(/\/+$/, '')
 const CMS_WS   = import.meta.env.VITE_CMS_WORKSPACE  // workspace alias
 const CMS_PROJ = import.meta.env.VITE_CMS_PROJECT     // project alias
 

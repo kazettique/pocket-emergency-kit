@@ -66,7 +66,7 @@ threshold).
 
 | Name                     | Required | Default                                  |
 |--------------------------|----------|------------------------------------------|
-| `CMS_BASE_URL`           | yes†     | —                                        |
+| `CMS_API_URL`            | yes†     | —                                        |
 | `CMS_WORKSPACE`          | yes†     | —                                        |
 | `CMS_PROJECT`            | yes†     | —                                        |
 | `CMS_EVAC_MODEL_KEY`     | yes†     | —                                        |
@@ -75,6 +75,11 @@ threshold).
 | `OVERPASS_ENDPOINT`      | no       | `https://overpass-api.de/api/interpreter` |
 
 † Skipped when running with `--dry-run`.
+
+**Important:** `CMS_API_URL` points at the integration-API host
+(`https://api.cms.test.reearth.dev` for the test env), **not** the UI
+host the PWA reads from (`https://cms.test.reearth.dev`). They are
+separate deployments.
 
 `IMPORT_BBOX` is `minLng,minLat,maxLng,maxLat`.
 
@@ -90,6 +95,9 @@ go run .
 
 - **401 on writes** — integration token missing write scope, or wrong
   project granted. Regenerate / grant in CMS UI.
+- **HTML response / "invalid character '<'"** — `CMS_API_URL` is
+  pointing at the UI host instead of the integration-API host. Use the
+  `api.` subdomain (e.g. `https://api.cms.test.reearth.dev`).
 - **404 on writes** — `CMS_WORKSPACE`, `CMS_PROJECT`, or
   `CMS_EVAC_MODEL_KEY` doesn't match your CMS. Verify each by opening
   the model in the CMS UI and checking the URL.

@@ -26,8 +26,10 @@ type ItemPayload struct {
 }
 
 // CMSClient talks to the Re:Earth integration API.
+// The integration API lives on its own hostname (e.g. api.cms.test.reearth.dev),
+// separate from the UI / public-read host.
 type CMSClient struct {
-	BaseURL   string // e.g. https://cms.test.reearth.dev
+	APIURL    string // e.g. https://api.cms.test.reearth.dev
 	Workspace string // workspace ID or alias
 	Project   string // project alias
 	ModelKey  string
@@ -36,9 +38,9 @@ type CMSClient struct {
 	http *http.Client
 }
 
-func NewCMSClient(baseURL, workspace, project, modelKey, token string) *CMSClient {
+func NewCMSClient(apiURL, workspace, project, modelKey, token string) *CMSClient {
 	return &CMSClient{
-		BaseURL:   strings.TrimRight(baseURL, "/"),
+		APIURL:    strings.TrimRight(apiURL, "/"),
 		Workspace: workspace,
 		Project:   project,
 		ModelKey:  modelKey,
@@ -49,7 +51,7 @@ func NewCMSClient(baseURL, workspace, project, modelKey, token string) *CMSClien
 
 func (c *CMSClient) itemsURL() string {
 	return fmt.Sprintf("%s/api/%s/projects/%s/models/%s/items",
-		c.BaseURL,
+		c.APIURL,
 		url.PathEscape(c.Workspace),
 		url.PathEscape(c.Project),
 		url.PathEscape(c.ModelKey),

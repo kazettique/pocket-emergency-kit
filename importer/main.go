@@ -37,7 +37,7 @@ func main() {
 	var cms *CMSClient
 	if !*dryRun {
 		required := map[string]string{
-			"CMS_BASE_URL":          os.Getenv("CMS_BASE_URL"),
+			"CMS_API_URL":           os.Getenv("CMS_API_URL"),
 			"CMS_WORKSPACE":         os.Getenv("CMS_WORKSPACE"),
 			"CMS_PROJECT":           os.Getenv("CMS_PROJECT"),
 			"CMS_EVAC_MODEL_KEY":    os.Getenv("CMS_EVAC_MODEL_KEY"),
@@ -53,7 +53,7 @@ func main() {
 			log.Fatalf("missing env vars: %s", strings.Join(missing, ", "))
 		}
 		cms = NewCMSClient(
-			required["CMS_BASE_URL"],
+			required["CMS_API_URL"],
 			required["CMS_WORKSPACE"],
 			required["CMS_PROJECT"],
 			required["CMS_EVAC_MODEL_KEY"],

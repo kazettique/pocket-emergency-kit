@@ -1,0 +1,4 @@
+# Compiled binary (from `go build .` with default output name)
+importer
+# Local env file
+.env

@@ -7,6 +7,7 @@ export default defineConfig(({ mode }) => {
   const cmsProxyTarget = (env.CMS_PROXY_TARGET || 'https://api.cms.test.reearth.dev').replace(/\/$/, '')
 
   return {
+  base: mode === 'production' ? '/pocket-emergency-kit/' : '/',
   build: {
     // Keep all feature code in the initial bundle so the service worker can
     // precache it on first visit for full offline capability.
@@ -60,10 +61,10 @@ export default defineConfig(({ mode }) => {
         background_color: '#1a1a2e',
         display: 'standalone',
         orientation: 'portrait',
-        start_url: '/',
+        start_url: '.',
         icons: [
-          { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+          { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
         ],
       },
     }),

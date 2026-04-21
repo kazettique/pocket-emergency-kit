@@ -115,12 +115,18 @@ export type ContactType =
 export interface JmaAlert {
   areaCode: string
   areaName: string
-  warnings: Array<{
-    type: string         // e.g. "強風注意報"
-    status: 'warning' | 'advisory' | 'clear'
-    text?: string
-  }>
-  fetchedAt: number      // Date.now()
+  headlineText?: string       // top-level human-readable summary from JMA
+  reportDatetime?: string     // ISO 8601 issue time
+  warnings: JmaWarning[]
+  fetchedAt: number           // Date.now()
+}
+
+export interface JmaWarning {
+  code: string                // JMA numeric code, e.g. "15"
+  severity: 'emergency' | 'warning' | 'advisory'
+  status: 'issued' | 'continuing' | 'cleared'
+  statusLabel: string         // raw JP: 発表 / 継続 / 解除
+  areas: string[]             // affected sub-region codes, e.g. ['130020','130030']
 }
 
 export interface JshisRisk {

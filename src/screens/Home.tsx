@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
-import type { JmaAlert, RiverLevel, UserSettings, ChecklistItem, ChecklistState, JshisRisk } from "../types";
+import type {
+  JmaAlert,
+  JmaWarning,
+  RiverLevel,
+  UserSettings,
+  ChecklistItem,
+  ChecklistState,
+  JshisRisk,
+} from "../types";
 import {
   getGovCache,
   getLastSyncedAt,
@@ -10,11 +18,13 @@ import {
   getChecklistState,
 } from "../db/idb";
 import { useT } from "../i18n";
+import type { StringKey } from "../i18n";
 import type { SyncState } from "../hooks/useSyncEngine";
 import { SyncBar } from "../components/SyncBar";
 import { AlertCard, type AlertVariant } from "../components/AlertCard";
 import { StatCard } from "../components/StatCard";
 import { haversineDistance } from "../utils/geo";
+import { warningName, areaName } from "../data/jmaCodes";
 import "./Home.css";
 
 const NEARBY_RADIUS_M = 2000;
@@ -24,6 +34,24 @@ function seismicColor(prob30yr: number): string {
   if (prob30yr >= 0.3) return "var(--c-warn-border)";
   return "var(--c-ok)";
 }
+
+function jmaVariant(severity: JmaWarning["severity"], status: JmaWarning["status"]): AlertVariant {
+  if (status === "cleared") return "ok";
+  if (severity === "emergency") return "danger";
+  return "warn";
+}
+
+const JMA_STATUS_KEY: Record<JmaWarning["status"], StringKey> = {
+  issued: "home.jmaStatusIssued",
+  continuing: "home.jmaStatusContinuing",
+  cleared: "home.jmaStatusCleared",
+};
+
+const JMA_SEVERITY_KEY: Record<JmaWarning["severity"], StringKey> = {
+  emergency: "home.jmaSeverityEmergency",
+  warning: "home.jmaSeverityWarning",
+  advisory: "home.jmaSeverityAdvisory",
+};
 
 interface HomeData {
   jma: JmaAlert | null;
@@ -112,7 +140,7 @@ export default function Home({ sync, onOpenSetup }: { sync: SyncState; onOpenSet
     data;
   const warningsCount = jma?.warnings.length ?? 0;
   const kitPct = kitPercent(checklistItems, checklistState);
-  const areaName = jma?.areaName ?? (lang === "en" ? "Tokyo" : "東京都");
+  const jmaAreaName = jma?.areaName ?? (lang === "en" ? "Tokyo" : "東京都");
 
   return (
     <section className="home screen">
@@ -144,29 +172,67 @@ export default function Home({ sync, onOpenSetup }: { sync: SyncState; onOpenSet
       <h2 className="home-title">{t("home.title")}</h2>
 
       <div className="home-section">
+        {jma?.headlineText ? (
+          <AlertCard
+            variant="warn"
+            title={t("home.jmaHeadline")}
+            body={jma.headlineText}
+            source={t("home.source.jma")}
+            updatedAt={jma.reportDatetime ? new Date(jma.reportDatetime) : jma.fetchedAt}
+          />
+        ) : null}
+
         {warningsCount === 0 ? (
           <AlertCard
             variant="ok"
-            title={t("home.jmaOk", { area: areaName })}
+            title={t("home.jmaOk", { area: jmaAreaName })}
             body={t("home.noWarnings")}
             source={t("home.source.jma")}
             updatedAt={jma?.fetchedAt}
           />
         ) : (
-          jma!.warnings.map((w, i) => (
-            <AlertCard
-              key={`${w.type}-${i}`}
-              variant="warn"
-              title={
-                w.status === "warning"
-                  ? t("home.jmaWarning", { area: areaName })
-                  : t("home.jmaAdvisory", { area: areaName })
-              }
-              body={w.text ?? w.type}
-              source={t("home.source.jma")}
-              updatedAt={jma!.fetchedAt}
-            />
-          ))
+          jma!.warnings.map((w) => {
+            const name = warningName(w.code, lang);
+            const severityLabel = t(JMA_SEVERITY_KEY[w.severity]);
+            const statusLabel = t(JMA_STATUS_KEY[w.status]);
+            const areasLabel = w.areas
+              .map((code) => areaName(code, lang))
+              .join(lang === "en" ? ", " : "・");
+            const body = `${severityLabel}・${statusLabel} — ${areasLabel}`;
+            return (
+              <AlertCard
+                key={w.code}
+                variant={jmaVariant(w.severity, w.status)}
+                title={name}
+                body={body}
+                source={t("home.source.jma")}
+                updatedAt={jma!.reportDatetime ? new Date(jma!.reportDatetime) : jma!.fetchedAt}
+              >
+                <dl className="home-jma-detail">
+                  <dt>{t("home.jmaStatus")}</dt>
+                  <dd>
+                    {severityLabel}・{statusLabel}
+                  </dd>
+                  <dt>{t("home.jmaAreas")}</dt>
+                  <dd>
+                    <ul className="home-jma-areas">
+                      {w.areas.map((code) => (
+                        <li key={code}>
+                          {areaName(code, lang)} <span className="home-jma-area-code">({code})</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </dd>
+                  {jma!.reportDatetime ? (
+                    <>
+                      <dt>{t("home.jmaIssuedAt")}</dt>
+                      <dd>{new Date(jma!.reportDatetime).toLocaleString(lang === "en" ? "en-US" : "ja-JP")}</dd>
+                    </>
+                  ) : null}
+                </dl>
+              </AlertCard>
+            );
+          })
         )}
       </div>
 

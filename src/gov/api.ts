@@ -1,5 +1,6 @@
-import type { JmaAlert, JshisRisk, RiverLevel, HazardZoneData } from '../types'
+import type { JmaAlert, JmaWarning, JshisRisk, RiverLevel, HazardZoneData } from '../types'
 import { saveGovCache, markSynced, isStale } from '../db/idb'
+import { severityFromCode } from '../data/jmaCodes'
 
 // ─── JMA weather alerts ────────────────────────────────────────────────────────
 // No API key needed. Tokyo area code: 130000
@@ -24,9 +25,19 @@ export async function fetchJmaAlerts(): Promise<JmaAlert | null> {
     if (!warnRes.ok) return null
     const warnData = await warnRes.json()
 
+    const warnDataObj = (warnData ?? {}) as Record<string, unknown>
+    const headlineText = typeof warnDataObj.headlineText === 'string'
+      ? warnDataObj.headlineText
+      : undefined
+    const reportDatetime = typeof warnDataObj.reportDatetime === 'string'
+      ? warnDataObj.reportDatetime
+      : undefined
+
     const alert: JmaAlert = {
       areaCode: JMA_AREA_CODE,
       areaName: JMA_AREA_NAMES[JMA_AREA_CODE] ?? '東京都',
+      headlineText,
+      reportDatetime,
       warnings: extractWarnings(warnData),
       fetchedAt: Date.now(),
     }
@@ -39,31 +50,72 @@ export async function fetchJmaAlerts(): Promise<JmaAlert | null> {
   }
 }
 
-function extractWarnings(warnData: unknown): JmaAlert['warnings'] {
+// Map JMA warning status labels to our enum. We skip the "no warning" row.
+function mapStatus(label: string): JmaWarning['status'] | null {
+  if (label === '発表') return 'issued'
+  if (label === '継続') return 'continuing'
+  if (label === '解除') return 'cleared'
+  return null // covers 発表警報・注意報はなし and unknown values
+}
+
+// Walk areaTypes[0] (prefecture-level; 2nd layer is municipal and too granular
+// for the home dashboard) and dedupe warnings by code across sub-regions,
+// collecting area codes into each warning's `areas` field.
+function extractWarnings(warnData: unknown): JmaWarning[] {
   if (!warnData || typeof warnData !== 'object') return []
   try {
     const data = warnData as Record<string, unknown>
-    const areas = (data.areaTypes as unknown[]) ?? []
-    const warnings: JmaAlert['warnings'] = []
+    const areaTypes = (data.areaTypes as unknown[]) ?? []
+    const top = areaTypes[0] as Record<string, unknown> | undefined
+    const areas = (top?.areas as unknown[]) ?? []
+
+    const byCode = new Map<string, JmaWarning>()
+
     for (const area of areas) {
       const a = area as Record<string, unknown>
-      const items = (a.areas as unknown[]) ?? []
-      for (const item of items) {
-        const i = item as Record<string, unknown>
-        const warnItems = (i.warnings as unknown[]) ?? []
-        for (const w of warnItems) {
-          const wi = w as Record<string, unknown>
-          if (wi.status !== 'なし') {
-            warnings.push({
-              type: wi.type as string,
-              status: wi.status === '警報' ? 'warning' : 'advisory',
-              text: wi.text as string | undefined,
-            })
+      const areaCode = typeof a.code === 'string' ? a.code : ''
+      if (!areaCode) continue
+      const warnItems = (a.warnings as unknown[]) ?? []
+      for (const w of warnItems) {
+        const wi = w as Record<string, unknown>
+        const code = typeof wi.code === 'string' ? wi.code : ''
+        const statusLabel = typeof wi.status === 'string' ? wi.status : ''
+        const status = mapStatus(statusLabel)
+        if (!code || !status) continue
+
+        const existing = byCode.get(code)
+        if (existing) {
+          existing.areas.push(areaCode)
+          // Promote status severity: issued/continuing beat cleared
+          if (existing.status === 'cleared' && status !== 'cleared') {
+            existing.status = status
+            existing.statusLabel = statusLabel
           }
+        } else {
+          byCode.set(code, {
+            code,
+            severity: severityFromCode(code),
+            status,
+            statusLabel,
+            areas: [areaCode],
+          })
         }
       }
     }
-    return warnings
+
+    // Sort: emergency → warning → advisory, then active → cleared
+    const severityRank: Record<JmaWarning['severity'], number> = {
+      emergency: 0,
+      warning: 1,
+      advisory: 2,
+    }
+    return [...byCode.values()].sort((a, b) => {
+      const s = severityRank[a.severity] - severityRank[b.severity]
+      if (s !== 0) return s
+      const aActive = a.status === 'cleared' ? 1 : 0
+      const bActive = b.status === 'cleared' ? 1 : 0
+      return aActive - bActive
+    })
   } catch {
     return []
   }

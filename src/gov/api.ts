@@ -6,23 +6,27 @@ import { saveGovCache, markSynced, isStale } from '../db/idb'
 
 const JMA_AREA_CODE = import.meta.env.VITE_JMA_AREA_CODE ?? '130000'
 
+// Tokyo metropolitan area label. JMA's warning endpoint doesn't return a
+// single prefecture-level label; we hardcode for the POC rather than
+// resolving via the area catalog.
+const JMA_AREA_NAMES: Record<string, string> = {
+  '130000': '東京都',
+}
+
 export async function fetchJmaAlerts(): Promise<JmaAlert | null> {
   try {
-    const res = await fetch(
-      `https://www.jma.go.jp/bosai/forecast/data/overview_week/${JMA_AREA_CODE}.json`
-    )
-    if (!res.ok) return null
-    const data = await res.json()
-
-    // Also fetch active warnings
+    // Only the warning endpoint — it carries everything the PWA renders
+    // (active alerts + advisories). The overview_* endpoints were used
+    // historically for the area label but 404'd on some prefecture codes.
     const warnRes = await fetch(
       `https://www.jma.go.jp/bosai/warning/data/warning/${JMA_AREA_CODE}.json`
     )
-    const warnData = warnRes.ok ? await warnRes.json() : null
+    if (!warnRes.ok) return null
+    const warnData = await warnRes.json()
 
     const alert: JmaAlert = {
       areaCode: JMA_AREA_CODE,
-      areaName: data.areaName ?? '東京都',
+      areaName: JMA_AREA_NAMES[JMA_AREA_CODE] ?? '東京都',
       warnings: extractWarnings(warnData),
       fetchedAt: Date.now(),
     }
@@ -66,23 +70,42 @@ function extractWarnings(warnData: unknown): JmaAlert['warnings'] {
 }
 
 // ─── J-SHIS seismic risk ───────────────────────────────────────────────────────
-// No API key needed. Returns mesh-level seismic hazard probability.
+// No API key needed. Returns 250 m mesh-level seismic hazard probability.
+// Spec: https://www.j-shis.bosai.go.jp/en/api-pshm-meshinfo
+//
+// URL shape: /pshm/{version}/{case}/{eqcode}/meshinfo.{format}
+//   version: Y2008…Y2024   — latest is Y2024
+//   case:    AVR | MAX     — using AVR (average) for the headline risk stat
+//   eqcode:  TTL_MTTL      — total (all quake sources combined)
+//   format:  geojson | gml — we parse geojson
+// attr query: T30_I50_PS   — 30-year probability of JMA intensity ≥5弱
+
+const JSHIS_VERSION = 'Y2024'
+const JSHIS_ATTR = 'T30_I50_PS'
 
 export async function fetchJshisRisk(lat: number, lng: number): Promise<JshisRisk | null> {
   try {
-    const url = `https://www.j-shis.bosai.go.jp/map/api/pshm/Y2020/T30/ps/meshinfo.json?position=${lng},${lat}&epsg=4326`
+    const url =
+      `https://www.j-shis.bosai.go.jp/map/api/pshm/${JSHIS_VERSION}/AVR/TTL_MTTL/meshinfo.geojson` +
+      `?position=${lng},${lat}&epsg=4326&attr=${JSHIS_ATTR}`
     const res = await fetch(url)
     if (!res.ok) return null
     const data = await res.json()
 
-    const result = data.RESULT ?? {}
+    const feature = (data?.features as Array<{ properties?: Record<string, unknown> }> | undefined)?.[0]
+    const props = feature?.properties ?? {}
+
+    const rawProb = Number(props[JSHIS_ATTR] ?? 0)
+    // J-SHIS responses vary between 0–1 and 0–100 depending on attr. Normalise.
+    const prob30yr = rawProb > 1 ? rawProb / 100 : rawProb
+
     const risk: JshisRisk = {
       lat,
       lng,
-      meshCode: result.MCODE ?? '',
-      prob30yr: parseFloat(result.PROB ?? '0') / 100, // API returns percentage
-      intensityClass: result.RANK ?? 'unknown',
-      siteAmplification: parseFloat(result.AVS30 ?? '0'),
+      meshCode: String(props.MESH_CODE ?? props.meshcode ?? ''),
+      prob30yr,
+      intensityClass: classifySeismicRisk(prob30yr),
+      siteAmplification: 0, // available via the sstruct endpoint, not fetched here
       fetchedAt: Date.now(),
     }
 
@@ -92,6 +115,15 @@ export async function fetchJshisRisk(lat: number, lng: number): Promise<JshisRis
   } catch {
     return null
   }
+}
+
+// Coarse 5-bucket classification roughly aligned with J-SHIS hazard map colours.
+function classifySeismicRisk(prob: number): string {
+  if (prob >= 0.26) return 'very_high'
+  if (prob >= 0.06) return 'high'
+  if (prob >= 0.03) return 'medium'
+  if (prob >= 0.006) return 'low'
+  return 'very_low'
 }
 
 // ─── MLIT hazard zones ─────────────────────────────────────────────────────────

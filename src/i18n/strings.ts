@@ -147,6 +147,8 @@ export const strings = {
     en: 'Straight-line from home',
   },
 
+  'filter.all': { ja: 'すべて', en: 'All' },
+
   'disaster.earthquake': { ja: '地震', en: 'Earthquake' },
   'disaster.flood': { ja: '洪水', en: 'Flood' },
   'disaster.tsunami': { ja: '津波', en: 'Tsunami' },

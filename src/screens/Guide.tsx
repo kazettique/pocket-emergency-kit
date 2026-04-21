@@ -7,8 +7,11 @@ import { MarkdownView } from '../components/MarkdownView'
 import './Guide.css'
 
 type Phase = 'before' | 'during' | 'after'
+type TypeFilter = DisasterType | 'all'
+type PhaseFilter = Phase | 'all'
 
-const TYPE_ORDER: readonly DisasterType[] = [
+const TYPE_ORDER: readonly TypeFilter[] = [
+  'all',
   'earthquake',
   'flood',
   'tsunami',
@@ -19,7 +22,8 @@ const TYPE_ORDER: readonly DisasterType[] = [
   'heatwave',
 ]
 
-const TYPE_KEY: Record<DisasterType, StringKey> = {
+const TYPE_KEY: Record<TypeFilter, StringKey> = {
+  all: 'filter.all',
   earthquake: 'disaster.earthquake',
   flood: 'disaster.flood',
   tsunami: 'disaster.tsunami',
@@ -30,9 +34,10 @@ const TYPE_KEY: Record<DisasterType, StringKey> = {
   heatwave: 'disaster.heatwave',
 }
 
-const PHASE_ORDER: readonly Phase[] = ['before', 'during', 'after']
+const PHASE_ORDER: readonly PhaseFilter[] = ['all', 'before', 'during', 'after']
 
-const PHASE_KEY: Record<Phase, StringKey> = {
+const PHASE_KEY: Record<PhaseFilter, StringKey> = {
+  all: 'filter.all',
   before: 'phase.before',
   during: 'phase.during',
   after: 'phase.after',
@@ -41,8 +46,8 @@ const PHASE_KEY: Record<Phase, StringKey> = {
 export default function Guide() {
   const { t, localize } = useT()
   const [articles, setArticles] = useState<GuideArticle[]>([])
-  const [type, setType] = useState<DisasterType>('earthquake')
-  const [phase, setPhase] = useState<Phase>('during')
+  const [type, setType] = useState<TypeFilter>('all')
+  const [phase, setPhase] = useState<PhaseFilter>('all')
   const [openArticle, setOpenArticle] = useState<GuideArticle | null>(null)
 
   useEffect(() => {
@@ -60,7 +65,11 @@ export default function Guide() {
   const filtered = useMemo(
     () =>
       articles
-        .filter((a) => a.disaster_type === type && a.phase === phase)
+        .filter(
+          (a) =>
+            (type === 'all' || a.disaster_type === type) &&
+            (phase === 'all' || a.phase === phase),
+        )
         .sort(
           (a, b) =>
             Number(b.is_critical) - Number(a.is_critical) || b.priority - a.priority,
@@ -72,8 +81,6 @@ export default function Guide() {
     return (
       <GuideDetail
         article={openArticle}
-        type={type}
-        phase={phase}
         onClose={() => setOpenArticle(null)}
         t={t}
         localize={localize}
@@ -154,15 +161,11 @@ export default function Guide() {
 
 function GuideDetail({
   article,
-  type,
-  phase,
   onClose,
   t,
   localize,
 }: {
   article: GuideArticle
-  type: DisasterType
-  phase: Phase
   onClose: () => void
   t: (key: StringKey, vars?: Record<string, string | number>) => string
   localize: <T extends object>(item: T | null | undefined, field: string) => string
@@ -183,7 +186,7 @@ function GuideDetail({
             ← {t('guide.back')}
           </button>
           <span className="guide-detail-context">
-            {t(TYPE_KEY[type])} · {t(PHASE_KEY[phase])}
+            {t(TYPE_KEY[article.disaster_type])} · {t(PHASE_KEY[article.phase])}
           </span>
         </div>
       </header>

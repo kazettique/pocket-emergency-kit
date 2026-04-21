@@ -39,6 +39,74 @@ will merge without duplicates.
 3. **Integration token** with write scope on this project. Workspace →
    My Integrations → create → grant to project → copy token.
 
+## Other CMS models used by the PWA
+
+The PWA reads four more models beyond `evacuation_site`. They're **not**
+populated by this importer — you author them directly in the CMS UI
+(they're editorial content, not pulled from a third-party source). The
+PWA's sync code treats a missing model as empty, so it's safe to create
+them incrementally.
+
+All five models need to be **publicly readable** once created.
+
+### `guide_article` — survival-guide articles
+
+| Field key       | Type          | Required | Unique | Notes |
+|-----------------|---------------|----------|--------|-------|
+| `title`         | Text          | yes      | no     | |
+| `title_en`      | Text          | no       | no     | |
+| `disaster_type` | Select        | yes      | no     | single value; same 8 options as above |
+| `phase`         | Select        | yes      | no     | single value; options: `before`, `during`, `after` |
+| `priority`      | Integer       | yes      | no     | higher = shown first |
+| `body`          | Markdown      | yes      | no     | rendered via react-markdown |
+| `body_en`       | Markdown      | no       | no     | |
+| `summary`       | TextArea      | no       | no     | 1-2 line preview in the list |
+| `is_critical`   | Boolean       | yes      | no     | red dot in the list, sorted first |
+| `icon_key`      | Text          | no       | no     | unused in v1; leave blank |
+
+### `checklist_item` — prep-checklist items
+
+| Field key         | Type     | Required | Unique | Notes |
+|-------------------|----------|----------|--------|-------|
+| `label`           | Text     | yes      | no     | |
+| `label_en`        | Text     | no       | no     | |
+| `category`        | Select   | yes      | no     | single value; options: `water_food`, `medical`, `tools`, `documents`, `plan`, `communication` |
+| `priority`        | Integer  | yes      | no     | higher = appears higher within its category |
+| `detail`          | TextArea | no       | no     | not shown in v1 UI but read by the sync for future detail view |
+| `detail_en`       | TextArea | no       | no     | |
+| `quantity_hint`   | Text     | no       | no     | e.g. "3日分" / "3 days" |
+| `coastal_only`    | Boolean  | yes      | no     | v1 shows all items regardless; reserved for later regional filtering |
+| `cold_region_only`| Boolean  | yes      | no     | same |
+| `image`           | Asset    | no       | no     | unused in v1 |
+
+### `emergency_contact` — municipal / CMS-managed contacts
+
+| Field key         | Type     | Required | Unique | Notes |
+|-------------------|----------|----------|--------|-------|
+| `label`           | Text     | yes      | no     | e.g. 「新宿区防災課」 |
+| `label_en`        | Text     | no       | no     | |
+| `number`          | Text     | yes      | no     | e.g. `03-5273-4467`; stored as text because of `#7119`-style non-numeric dials |
+| `type`            | Select   | yes      | no     | single value; options: `police`, `fire`, `ambulance`, `disaster_line`, `river`, `welfare`, `hospital`, `city_hall` |
+| `scope`           | Select   | yes      | no     | single value; options: `national`, `city`. PWA's SOS screen shows `city`-scope items in the "City contacts" section; hard-coded nationals (110/119/#7119/171) are not stored in the CMS. |
+| `available_hours` | Text     | no       | no     | e.g. `24時間` / `Weekdays 9:00-17:00` |
+| `url`             | URL      | no       | no     | optional web link |
+| `priority`        | Integer  | yes      | no     | sort order within the scope |
+| `notes`           | TextArea | no       | no     | |
+
+### `area_annotation` — municipal notes / warnings on the map
+
+| Field key             | Type           | Required | Unique | Notes |
+|-----------------------|----------------|----------|--------|-------|
+| `title`               | Text           | yes      | no     | |
+| `body`                | TextArea       | yes      | no     | |
+| `location`            | GeoObject      | yes      | no     | Point |
+| `zone`                | GeoObject      | no       | no     | optional Polygon describing the affected area |
+| `annotation_type`     | Select         | yes      | no     | single value; options: `warning`, `tip`, `facility_note`, `route_note`, `historical` |
+| `disaster_relevance`  | Select (multi) | yes      | no     | same 8 options as `disaster_types` on `evacuation_site` |
+| `severity`            | Select         | yes      | no     | single value; options: `info`, `caution`, `danger` |
+| `source`              | Text           | no       | no     | attribution |
+| `valid_until`         | Date           | no       | no     | optional expiry |
+
 ## Usage
 
 ```sh

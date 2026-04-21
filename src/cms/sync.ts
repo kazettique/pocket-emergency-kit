@@ -42,6 +42,10 @@ async function fetchAllPages<T>(model: string): Promise<T[]> {
   while (true) {
     const url = `${cmsUrl(model)}?page=${page}&limit=${limit}`
     const res = await fetch(url)
+    if (res.status === 404) {
+      // Model not created in this project yet — not an error for the PWA.
+      return []
+    }
     if (!res.ok) throw new Error(`CMS fetch failed: ${model} page ${page} → ${res.status}`)
     const data = await res.json()
     // Re:Earth CMS public API response envelope:

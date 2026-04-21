@@ -76,6 +76,30 @@
   outline-offset: 1px;
 }
 
+.toggle-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.refresh-btn {
+  padding: 2px 6px;
+}
+
+.refresh-btn svg {
+  display: block;
+  transition: transform 150ms ease;
+}
+
+.refresh-btn.is-spinning svg {
+  animation: refresh-spin 0.8s linear infinite;
+}
+
+@keyframes refresh-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* ─── SyncBar ─────────────────────────────────────────────────────────────── */
 .syncbar {
   display: flex;

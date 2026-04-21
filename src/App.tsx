@@ -39,7 +39,12 @@ function Shell() {
   return (
     <div className="app">
       {!sync.isOnline ? <OfflineBanner /> : null}
-      <TopStatusBar isOnline={sync.isOnline} lastSyncAt={sync.lastSyncAt} status={sync.status} />
+      <TopStatusBar
+        isOnline={sync.isOnline}
+        lastSyncAt={sync.lastSyncAt}
+        status={sync.status}
+        onRefresh={() => sync.triggerSync(true)}
+      />
       <main className="app-main">
         {tab === 'home' && <Home sync={sync} onOpenSetup={() => setSetupOpen(true)} />}
         {tab === 'map' && <Map />}

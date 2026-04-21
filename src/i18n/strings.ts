@@ -198,6 +198,7 @@ export const strings = {
 
   'toggle.lang.aria': { ja: '言語を切り替え', en: 'Toggle language' },
   'toggle.theme.aria': { ja: 'テーマを切り替え', en: 'Toggle theme' },
+  'toggle.refresh.aria': { ja: '手動で同期', en: 'Refresh now' },
 
   'time.justNow': { ja: 'たった今', en: 'just now' },
 } satisfies Record<string, Entry>

@@ -12,6 +12,8 @@ import (
 const (
 	typeText           = "text"
 	typeTextArea       = "textArea"
+	typeMarkdown       = "markdown"
+	typeURL            = "url"
 	typeInteger        = "integer"
 	typeBool           = "bool"
 	typeDate           = "date"

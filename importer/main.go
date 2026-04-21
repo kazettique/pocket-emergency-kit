@@ -21,12 +21,56 @@ var defaultBBox = [4]float64{35.50, 139.58, 35.83, 139.92}
 const writeRateMs = 200
 
 func main() {
-	dryRun := flag.Bool("dry-run", false, "Transform and print payloads without writing to CMS")
-	limit := flag.Int("limit", 0, "Cap on writes (0 = no cap). With --dry-run, caps printed payloads to this number.")
-	flag.Parse()
+	sub, rest := popSubcommand(os.Args[1:])
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
+
+	switch sub {
+	case "evac", "":
+		runEvac(ctx, rest)
+	case "seed":
+		runSeed(ctx, rest)
+	case "-h", "--help", "help":
+		printUsage()
+	default:
+		fmt.Fprintf(os.Stderr, "unknown subcommand %q\n\n", sub)
+		printUsage()
+		os.Exit(2)
+	}
+}
+
+// popSubcommand peels the first positional (non-flag) argument off argv and
+// returns it alongside the remaining args. Flags stay in order for the
+// subcommand's own FlagSet to parse.
+func popSubcommand(args []string) (string, []string) {
+	for i, a := range args {
+		if strings.HasPrefix(a, "-") {
+			continue
+		}
+		return a, append(append([]string{}, args[:i]...), args[i+1:]...)
+	}
+	return "", args
+}
+
+func printUsage() {
+	fmt.Println(`Usage:
+  importer [evac] [flags]                Overpass → evacuation_site (default)
+  importer seed <model> [flags]          Seed a CMS model from embedded content
+  importer help                          Show this message
+
+Seedable models: guide_article, checklist_item, emergency_contact, area_annotation
+
+Common flags:
+  --dry-run        Print payloads without writing
+  --limit N        Cap on writes (or printed payloads under --dry-run)`)
+}
+
+func runEvac(ctx context.Context, args []string) {
+	fs := flag.NewFlagSet("evac", flag.ExitOnError)
+	dryRun := fs.Bool("dry-run", false, "Transform and print payloads without writing to CMS")
+	limit := fs.Int("limit", 0, "Cap on writes (0 = no cap). With --dry-run, caps printed payloads to this number.")
+	_ = fs.Parse(args)
 
 	bbox, err := loadBBox(os.Getenv("IMPORT_BBOX"))
 	if err != nil {
@@ -64,7 +108,7 @@ func main() {
 	seen := map[string]struct{}{}
 	if !*dryRun {
 		log.Println("listing existing items for dedup...")
-		s, err := cms.ListSourceIDs(ctx)
+		s, err := cms.ListFieldValues(ctx, "source_id")
 		if err != nil {
 			log.Fatalf("list existing items: %v", err)
 		}

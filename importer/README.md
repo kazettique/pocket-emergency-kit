@@ -114,35 +114,57 @@ cd importer
 cp .env.example .env
 # edit .env: paste CMS_INTEGRATION_TOKEN, adjust other values if needed
 
-# Preview first 3 payloads without writing (no CMS token required here)
-go run . --dry-run --limit 3
+# Evac-site import (from Overpass) — the default subcommand
+go run . --dry-run --limit 3    # preview
+go run .                        # full import
+go run . --limit 5              # capped smoke test
 
-# Full import
-go run .
-
-# Capped import for smoke-testing
-go run . --limit 5
+# Seed one of the content models from embedded Go data
+go run . seed guide_article --dry-run --limit 1
+go run . seed guide_article
+go run . seed checklist_item
+go run . seed emergency_contact
+go run . seed area_annotation
 ```
 
-Expected full-run behaviour: Overpass returns ~400-500 shelter features
-for the Tokyo 23-wards bbox, rate-limited writes take ~1-2 minutes, and
-the PWA's Map tab shows markers after the next sync pass (you can force
-a sync by reloading the PWA while online, or wait for the 6-hour stale
-threshold).
+Expected evac run: Overpass returns ~400-500 shelter features for the
+Tokyo 23-wards bbox, rate-limited writes take ~1-2 minutes, and the
+PWA's Map tab shows markers after the next sync pass (reload the PWA
+while online, or wait for the 6-hour stale threshold).
+
+Expected seed run: the counts are small (~20 guide articles, ~25
+checklist items, ~10 contacts, ~8 annotations), so seeding all four
+takes well under a minute.
+
+### Seed dedup caveat
+
+Seed runs dedup on a **content field** (`title` for articles and
+annotations, `label` for checklist items and contacts) rather than a
+dedicated `source_id` (the 4 content models don't have one). Re-running
+`seed` is idempotent, but **renaming a title/label in Go then
+re-running will create a duplicate**. Either edit the entry directly in
+the CMS UI afterwards, or delete the old item before re-seeding.
 
 ## Environment variables
 
-| Name                    | Required | Default                                   |
-| ----------------------- | -------- | ----------------------------------------- |
-| `CMS_API_URL`           | yes†     | —                                         |
-| `CMS_WORKSPACE`         | yes†     | —                                         |
-| `CMS_PROJECT`           | yes†     | —                                         |
-| `CMS_EVAC_MODEL_KEY`    | yes†     | —                                         |
-| `CMS_INTEGRATION_TOKEN` | yes†     | —                                         |
-| `IMPORT_BBOX`           | no       | `139.58,35.50,139.92,35.83` (Tokyo)       |
-| `OVERPASS_ENDPOINT`     | no       | `https://overpass-api.de/api/interpreter` |
+| Name                        | Required  | Default                                   |
+| --------------------------- | --------- | ----------------------------------------- |
+| `CMS_API_URL`               | yes†      | —                                         |
+| `CMS_WORKSPACE`             | yes†      | —                                         |
+| `CMS_PROJECT`               | yes†      | —                                         |
+| `CMS_INTEGRATION_TOKEN`     | yes†      | —                                         |
+| `CMS_EVAC_MODEL_KEY`        | evac only | —                                         |
+| `CMS_GUIDE_MODEL_KEY`       | no        | `guide_article`                           |
+| `CMS_CHECKLIST_MODEL_KEY`   | no        | `checklist_item`                          |
+| `CMS_CONTACT_MODEL_KEY`     | no        | `emergency_contact`                       |
+| `CMS_ANNOTATION_MODEL_KEY`  | no        | `area_annotation`                         |
+| `IMPORT_BBOX`               | no        | `139.58,35.50,139.92,35.83` (Tokyo)       |
+| `OVERPASS_ENDPOINT`         | no        | `https://overpass-api.de/api/interpreter` |
 
 † Skipped when running with `--dry-run`.
+
+The seed `CMS_*_MODEL_KEY` overrides only matter if your CMS model slug
+differs from the default (the model name itself).
 
 **Important:** `CMS_API_URL` points at the integration-API host
 (`https://api.cms.test.reearth.dev` for the test env), **not** the UI

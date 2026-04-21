@@ -72,9 +72,11 @@ type rawItem struct {
 	Fields []Field `json:"fields"`
 }
 
-// ListSourceIDs pages through every item in the model and returns the set of
-// values on the `source_id` field, for dedup.
-func (c *CMSClient) ListSourceIDs(ctx context.Context) (map[string]struct{}, error) {
+// ListFieldValues pages through every item in the model and returns the set
+// of values on the given field key. Used for dedup: evac-site import keys on
+// `source_id`; seed imports key on the natural title/label field of each
+// model.
+func (c *CMSClient) ListFieldValues(ctx context.Context, fieldKey string) (map[string]struct{}, error) {
 	seen := make(map[string]struct{})
 	page := 1
 	const perPage = 100
@@ -100,7 +102,7 @@ func (c *CMSClient) ListSourceIDs(ctx context.Context) (map[string]struct{}, err
 		}
 		for _, it := range parsed.Items {
 			for _, f := range it.Fields {
-				if f.Key == "source_id" {
+				if f.Key == fieldKey {
 					if s, ok := f.Value.(string); ok && s != "" {
 						seen[s] = struct{}{}
 					}

@@ -1,31 +1,36 @@
 .app {
   display: flex;
   flex-direction: column;
-  min-height: 100svh;
-  max-width: var(--app-width);
-  margin: 0 auto;
+  height: 100svh;
   background: var(--c-bg);
   position: relative;
-  border-left: 0.5px solid var(--c-border-subtle);
-  border-right: 0.5px solid var(--c-border-subtle);
 }
 
 .app-main {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
-  padding-bottom: calc(var(--tap) + env(safe-area-inset-bottom, 0px) + var(--sp-3));
 }
 
+/* ── Top status bar ──────────────────────────────────────────────────────── */
+
 .topbar {
+  flex-shrink: 0;
+  background: var(--c-bg-secondary);
+  border-bottom: 0.5px solid var(--c-border);
+}
+
+.topbar-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--sp-3);
   padding: 7px var(--sp-4) 5px;
-  background: var(--c-bg-secondary);
-  border-bottom: 0.5px solid var(--c-border);
   font-size: var(--fs-xs);
   color: var(--c-text-secondary);
+  max-width: var(--content-width);
+  margin: 0 auto;
+  width: 100%;
 }
 
 .topbar-status {

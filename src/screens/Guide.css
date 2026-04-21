@@ -1,5 +1,8 @@
 .guide-screen {
   padding: var(--sp-4);
+  max-width: var(--content-width);
+  margin: 0 auto;
+  width: 100%;
 }
 
 .guide-title {
@@ -170,22 +173,24 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  max-width: var(--app-width);
-  margin: 0 auto;
-  border-left: 0.5px solid var(--c-border-subtle);
-  border-right: 0.5px solid var(--c-border-subtle);
 }
 
 .guide-detail-header {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-3);
-  padding: var(--sp-3) var(--sp-4);
   border-bottom: 0.5px solid var(--c-border);
   background: var(--c-bg);
   position: sticky;
   top: 0;
   z-index: 1;
+}
+
+.guide-detail-header-inner {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  max-width: var(--content-width);
+  margin: 0 auto;
+  width: 100%;
 }
 
 .guide-detail-back {
@@ -213,6 +218,9 @@
   flex: 1;
   padding: var(--sp-4);
   padding-bottom: calc(var(--sp-6) + env(safe-area-inset-bottom, 0px));
+  max-width: var(--content-width);
+  margin: 0 auto;
+  width: 100%;
 }
 
 .guide-detail-title {

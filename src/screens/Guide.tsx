@@ -178,12 +178,14 @@ function GuideDetail({
       aria-labelledby="guide-detail-title"
     >
       <header className="guide-detail-header">
-        <button type="button" className="guide-detail-back" onClick={onClose} autoFocus>
-          ← {t('guide.back')}
-        </button>
-        <span className="guide-detail-context">
-          {t(TYPE_KEY[type])} · {t(PHASE_KEY[phase])}
-        </span>
+        <div className="guide-detail-header-inner">
+          <button type="button" className="guide-detail-back" onClick={onClose} autoFocus>
+            ← {t('guide.back')}
+          </button>
+          <span className="guide-detail-context">
+            {t(TYPE_KEY[type])} · {t(PHASE_KEY[phase])}
+          </span>
+        </div>
       </header>
       <div className="guide-detail-body">
         <h1 id="guide-detail-title" className="guide-detail-title">

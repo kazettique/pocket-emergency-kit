@@ -1,5 +1,8 @@
 .kit-screen {
   padding: var(--sp-4);
+  max-width: var(--content-width);
+  margin: 0 auto;
+  width: 100%;
 }
 
 .kit-title {

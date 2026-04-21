@@ -137,12 +137,14 @@ export default function Setup({ sync, onClose }: { sync: SyncState; onClose: () 
       aria-labelledby="setup-title"
     >
       <header className="setup-header">
-        <button ref={backRef} type="button" className="setup-header-back" onClick={onClose}>
-          ← {t('setup.header.back')}
-        </button>
-        <h1 id="setup-title" className="setup-header-title">
-          {t('setup.header.title')}
-        </h1>
+        <div className="setup-header-inner">
+          <button ref={backRef} type="button" className="setup-header-back" onClick={onClose}>
+            ← {t('setup.header.back')}
+          </button>
+          <h1 id="setup-title" className="setup-header-title">
+            {t('setup.header.title')}
+          </h1>
+        </div>
       </header>
 
       <div className="setup-body">

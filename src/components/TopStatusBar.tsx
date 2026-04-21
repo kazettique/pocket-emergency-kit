@@ -22,15 +22,17 @@ export function TopStatusBar({ isOnline, lastSyncAt, status, onRefresh }: TopSta
 
   return (
     <div className="topbar">
-      <span className="topbar-status">
-        <span className={`topbar-dot${isOnline ? '' : ' offline'}`} aria-hidden="true" />
-        <span className="topbar-text">{text}</span>
-      </span>
-      <span className="topbar-toggles">
-        <RefreshButton status={status} isOnline={isOnline} onRefresh={onRefresh} />
-        <LanguageToggle />
-        <ThemeToggle />
-      </span>
+      <div className="topbar-inner">
+        <span className="topbar-status">
+          <span className={`topbar-dot${isOnline ? '' : ' offline'}`} aria-hidden="true" />
+          <span className="topbar-text">{text}</span>
+        </span>
+        <span className="topbar-toggles">
+          <RefreshButton status={status} isOnline={isOnline} onRefresh={onRefresh} />
+          <LanguageToggle />
+          <ThemeToggle />
+        </span>
+      </div>
     </div>
   )
 }

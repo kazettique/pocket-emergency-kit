@@ -21,7 +21,7 @@ will merge without duplicates.
    | `location`       | GeoObject   | yes      | no     |
    | `address`        | Text        | no       | no     |
    | `capacity`       | Integer     | yes      | no     |
-   | `disaster_types` | Tag (multi) | yes      | no     |
+   | `disaster_types` | Select (multi) | yes   | no     |
    | `accessible`     | Boolean     | yes      | no     |
    | `accepts_pets`   | Boolean     | yes      | no     |
    | `notes`          | TextArea    | no       | no     |
@@ -29,7 +29,8 @@ will merge without duplicates.
    | `source_id`      | Text        | yes      | **yes** |
    | `verified_at`    | Date        | yes      | no     |
 
-   Allowed tag values for `disaster_types`: `earthquake`, `flood`,
+   Configure `disaster_types` as a **Select** field with **multiple
+   values enabled** and these 8 allowed values: `earthquake`, `flood`,
    `tsunami`, `fire`, `landslide`, `storm_surge`, `typhoon`, `heatwave`.
 
 2. **Public API enabled** on the project (so the PWA can read). Project
@@ -95,7 +96,7 @@ go run .
 - **400 on writes with "type mismatch"** — the `type` string in the
   payload doesn't match what your CMS model expects. Edit the constants
   at the top of `transform.go` (`typeText`, `typeGeometryObject`,
-  `typeTag`, `typeBool`, etc.) and re-run.
+  `typeSelect`, `typeBool`, etc.) and re-run.
 - **429 from Overpass** — the public endpoint throttles. Either wait
   a few minutes or set `OVERPASS_ENDPOINT` to a mirror (e.g.
   `https://overpass.kumi.systems/api/interpreter`).

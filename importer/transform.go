@@ -15,7 +15,7 @@ const (
 	typeInteger        = "integer"
 	typeBool           = "bool"
 	typeDate           = "date"
-	typeTag            = "tag"
+	typeSelect         = "select"
 	typeGeometryObject = "geometryObject"
 )
 
@@ -58,7 +58,7 @@ func elementToFields(el OsmElement, now time.Time) []Field {
 	}
 	fields = append(fields, Field{Key: "capacity", Type: typeInteger, Value: cap})
 
-	fields = append(fields, Field{Key: "disaster_types", Type: typeTag, Value: deriveDisasterTypes(tags)})
+	fields = append(fields, Field{Key: "disaster_types", Type: typeSelect, Value: deriveDisasterTypes(tags)})
 
 	accessible := tags["wheelchair"] == "yes"
 	fields = append(fields, Field{Key: "accessible", Type: typeBool, Value: accessible})
@@ -108,8 +108,8 @@ func deriveAddress(tags map[string]string) string {
 }
 
 // deriveDisasterTypes maps OSM shelter tags to our PWA's DisasterType enum.
-// Always returns at least one value so the `tag` field never ships an empty
-// array (the CMS may reject that).
+// Always returns at least one value so the multi-select `select` field never
+// ships an empty array (the CMS may reject that).
 func deriveDisasterTypes(tags map[string]string) []string {
 	set := map[string]struct{}{}
 
